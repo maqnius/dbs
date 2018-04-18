@@ -1,0 +1,72 @@
+\input{../src/header}											% bindet Header ein (WICHTIG)
+
+\newcommand{\dozent}{Prof. Dr. Agnès Voisard \\ Nicolas Lehmann}					% <-- Names des Dozenten eintragen
+\newcommand{\tutor}{Alexander Schulz}						% <-- Name eurer Tutoriun eintragen
+\newcommand{\tutoriumNo}{04}				% <-- Nummer im KVV nachschauen
+\newcommand{\ubungNo}{01}									% <-- Nummer des Übungszettels
+\newcommand{\veranstaltung}{Datenbanksysteme}	% <-- Name der Lehrveranstaltung eintragen
+\newcommand{\semester}{SoSe 18}						% <-- z.B. SoSo 17, WiSe 17/18
+\newcommand{\studenten}{Mark Niehues}			% <-- Hier eure Namen eintragen
+\addbibresource{./src/lit.bib} %Bibliographiedateien laden
+
+% /////////////////////// BEGIN DOKUMENT /////////////////////////
+\begin{document}
+\input{../src/titlepage}										% erstellt die Titelseite
+
+\section{}
+\section{Zielkonflikte in der Softwareentwicklung}
+\subsection*{a)}
+Qualität und Umfang konkurrieren gegen Zeitaufwand und Kosten. Da die Maximierung der Ersteren immer der gewünschten Minimierung der letzten beiden Faktoren entgegenwirkt, müssen Kompromisse eingegangen werden und eruiert werden, in welcher Kategorie die Optimierung am passendsten ist.
+
+\subsection*{b)}
+Bei Verwaltungssoftware im öffentlichen Dienst stehen, aufgrund der Ausschreibepflicht, die Kosten im Mittelpunkt.
+
+Wenn schnell ein neuer Markt erschlossen werden muss, ist ein geringer Zeitaufwand im Vordergrund.
+
+Bei Systemen, die einen hohen Schaden anrichten können (zB. selbstfahrende Autos), sollte die Qualität im Vordergrund stehen.
+
+Bei Software, die eine Vielzahl verschiedener Probleme lösen muss (zB. Betriebssysteme), sollte ein großer Umfang Priorität haben, oder zumindest die Erweiterbarkeit bedacht werden.
+
+\subsection*{c)}
+Da die zu maximierenden, frei wählbaren Faktoren "hohe Qualität" und "großer Umfang" nicht vereinbar sind mit niedrigen Kosten bei gleichzeitig geringem Zeitaufwand. Dementsprechend können nur maximal zwei der "Ecken" erfüllt werden.
+
+\subsection*{d)}
+Die Entwicklungszeit lässt sich durch doppelten Kosteneinsatz bei einem zweiten Entwickler nicht einfach halbieren, da die Entwickler zusätzlich Zeit benötigen um ihre Arbeit abzusprechen. 
+
+Sehr Grob idealisiert (aka Milchmädchenrechnung) müssen bei n-Entwicklern $ n*(n-1) / 2$ einzelne Absprachen getroffen werden, die jeweils eine Konstante Zeit dauern. Die Abhängigkeit der Zeit von der Anzahl Entwickler wäre demnach ähnlich zu der Funktion $T(n) = 1/n + n * (n-1) * C $. In Fig. \ref{img:plot} ist zu erkennen, dass daraus folgt, dass die Entwicklungszeit ab einer gewissen Anzahl beteiligter Entwickler wegen dem Overhead an notwendiger Absprache wieder zunimmt und schließlich sogar die ursprüngliche Entwicklungszeit eines einzelnen Entwicklers übersteigt. Der konkrete Verlauf ist von vielen Faktoren, wie zB. dem Projektmanagement, der Infrastruktur und sozialen Umständen, abhängig. Prinzipiell wird es jedoch ab einer gewissen Entwickleranzahl einen Anstieg der Entwicklungszeit geben, da Zusammenarbeit immer auch einen kleinen zusätzlichen Zeitaufwand bedeutet. 
+
+\begin{figure} [h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{./src/plot.png}
+	\caption{Schematische Korrelation zwischen der Anzahl Entwickler und der Entwicklungszeit}
+	\label{img:plot}
+\end{figure}
+
+\section{}
+\subsection*{a)}
+\begin{itemize}
+\item Klasse: Definiert ein Modell von ähnlichen Objekten
+\item Vererbung: Definiert die Übertragung der Eigenschaften einer Klasse an eine Unterklasse
+\item Attribut: Eigenschaften einer Klasse
+\item Operation: Kleinster Verarbeitungsschritt
+\item Methode: Funktionen einer Klasse
+\item Exemplar: Entspricht Objekt
+\item Objekt: Konkrete, lauffähige Instanz einer Klasse
+\item Bibliothek: Sammlung mehrerer thematisch zusammenhängender Unterprogramme zur Verwendung in anderen Programmen
+\item Spezifikation: Festlegung der Funktionalität, Einsatzszenarien und Anforderungen einer Software \cite{wiki}
+\item Implementierung: Umsetzung der Spezifikation in eine funktionierende Software
+\item Verifikation: Testen der Implementierung und Überprüfung ob die Spezifikationen umgesetzt wurden
+\item Geheimnisprinzip: Das Geheimnisprinzip meint allgemein die Einschränkung der Verfügbarkeit von Daten innerhalb einer Software. Dies umfasst den Gültigkeitsbereich der Daten nur innerhalb eines Bereiches (scope) und den Zugriff auf Daten nur über definierte Schnittstellen. 
+\end{itemize}
+
+\subsection*{b)}
+Eine Klasse ist ein abstraktes Modell, das Spezifikationen beschreibt aber nicht zur Laufzeit benutzt werden kann. Zur Laufzeit wird so ein Modell instanziiert und ggf. Attribute mit konkreten Werten gefüllt, sodass dieses Objekt genutzt werden kann. Von einer Klasse können beliebig viele Instanzen in verschiedenen Anfangszuständen (innerhalb des von der Klasse festgelegten Spielraumes) erzeugt werden.
+
+\subsection*{c)}
+\begin{itemize}
+\item Prozess: Umfasst alle konkreten Abläufe eines Projekts
+\item Produkt: Der Prozess wird vervollständigt durch das das Produkt, bestehend aus allen materiellen Arbeitsergebnissen (Programmcode, Dokumentation etc.).
+\end{itemize}
+\printbibliography %hier Bibliographie ausgeben lassen
+
+\end{document}
