@@ -12,3 +12,4 @@
 *.o
 # java class files
 *.class
+bin/
