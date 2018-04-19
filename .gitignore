@@ -6,3 +6,9 @@
 *.out
 *.xml
 *.synctex.gz
+
+# haskell intermediate output
+*.hi
+*.o
+# java class files
+*.class
