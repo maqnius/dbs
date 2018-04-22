@@ -44,12 +44,48 @@ Funktionale Anforderungen sind essentiele Funktionen wie zB. das Löschen und Er
 Meta-Daten sind Daten, welche die eigentlichen Daten beschreiben und definieren. Z.B. wird bei relationealen Datenbanken in den Meta-Daten festgelegt, welche Einträge es gibt, welche Datentypen und Wertebereich diese Einträge haben, wie sie mit anderen Tabellen zusammen hängen und welchen Bezeichner sie besizuen ("Tabellenkopf").
 
 \section{Arten von Datenbanksystemen}
-\subsection{Hierarchisches Datenbankmodell}
-Beim hierarchischen Datenbankmodell werden die Datensätze in einer Baumstruktur angeordnet. Dies ist das älteste Datenbankmodell. Beziehung zwischen den Datensätzen werden dementsprechend und können auch nur als Eltern-Kind-Beziehung realisiert werden. Ein Beispiel hierfür wäre die Datenspeicherung mit XML.
+\subsection{Arten}
+\begin{itemize}
+\item  hierarchisch
+\item netwerkartig
+\item relational
+\item objektorientiert
+\item dokumentenorientiert
+\end{itemize}
 
-\subsection{Netzwerkdatenbankmodell}
-\subsection{Relationales Datenbankmodell}
-\subsection{Objektorientiertes Datenbankmodell}
+\subsection{NoSQl}
+NoSQL steht für „Not only SQL“. Damit werden Datenbanken bezeichnet, die mit der langen Tradition der relationalen Datenbanken brechen. Sie verfolgen einen nicht-relationalen Ansatz. Dabei kann eher von Datenspeichern als von Datenbanken gesprochen werden.
+Es existieren keine festgelegten Tabellenschemata, Joins werden vermieden und es wird horizontal skaliert. Die sogenannten NoSQL-Datenbanken werden häufig auch als „strukturierte Datenspeicher“ (Structured Storage) bezeichnet.
+
+Dokumentenorientierte Datenbanken, Key-Value-Datenbanken, Graphendatenbanken, spaltenorientierte Datenbanken .. Entscheidend ist, dass keine strikten Tabellenschemata existieren und Relationen zwischen Datensätzen nicht definiert sind.
+
+\subsection{3}
+Das RDF-Modell ist ein Datenmodell mit einer wohldefinierten formalen Semantik, das auf gerichteten Graphen basiert. Daten in RDF sind Aussagen über Ressourcen. Diese Aussagen werden dabei als Tripel modelliert. Die Menge der Tripel bildet einen (mathematischen) Graphen, und wird als RDF-Modell bezeichnet. Ein Tripel ist eine Elementaraussage, die aus Subjekt, Prädikat und Objekt besteht.
+
+ \begin{table}[h]
+ \centering
+ \caption{Beispieldatensatz \texttt{<http://RDFDATABASE/>} \cite{wiki:rdf}}
+   \begin{tabular}{lll}
+  Subjekt & Prädikat & Objekt \\ 
+  \hline
+  ACME & produziert & Batterien \\
+  Batterien & enthalten &  Säure \\
+  Batterien & enthalten & Zink \\
+  ACME & ist & eine Firma
+ \end{tabular}
+ \end{table}
+
+\subsection{Beispielabfrage}
+
+\lstinputlisting[									% Style
+	caption={Beispielabfrage},		% Beschriftung
+	firstnumber={1},										% Start der Nummerierung
+	firstline={0}											% 1. Codezeile
+]											% letzte Codezeile
+{./src/example.sparql}
+
+\texttt{foaf} ist eine Abkürzung für \texttt{<http://RDFDATABASE/>
+}. \texttt{ SELECT * } nimmt alle (mit '?') deklarierten Variablen in der Abfrage. Die Abfrage liefert alle Subjekte, die produzieren samt dem Produkt.
 
 
 \section{Typische Abfragen an ein Datenbanksystem}

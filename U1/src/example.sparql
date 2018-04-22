@@ -1,0 +1,5 @@
+PREFIX foaf: <http://RDFDATABASE/>
+SELECT *
+WHERE {
+	?subject foaf:produziert ?object .
+}
