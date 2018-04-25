@@ -15,9 +15,9 @@
 
 		<script type="text/javascript">
 			document.getElementById("knopf").onclick = () => {
-				text = 'Hallo ';
-				eingabe = document.getElementById("feld").value;
-				if(eingabe){
+				let text = 'Hallo ';
+				let eingabe = document.getElementById("feld").value;
+				if(eingabe.trim()){
 					text += eingabe + '!';
 				} else {
 					text += 'Unbekannter!'
