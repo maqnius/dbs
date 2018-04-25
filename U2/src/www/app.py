@@ -6,4 +6,4 @@ debug(True)
 def index():
     return template('index')
 
-run(host='localhost', port=8080)
+run(host='localhost', port=8050)
