@@ -1,9 +1,9 @@
 \input{../src/header}											% bindet Header ein (WICHTIG)
 
 \newcommand{\dozent}{Prof. Dr. Agnès Voisard \\ Nicolas Lehmann}					% <-- Names des Dozenten eintragen
-\newcommand{\tutor}{Alexander Schulz}						% <-- Name eurer Tutoriun eintragen
-\newcommand{\tutoriumNo}{04}				% <-- Nummer im KVV nachschauen
-\newcommand{\ubungNo}{03}									% <-- Nummer des Übungszettels
+\newcommand{\tutor}{Toni Draßdo}						% <-- Name eurer Tutoriun eintragen
+\newcommand{\tutoriumNo}{03}				% <-- Nummer im KVV nachschauen
+\newcommand{\ubungNo}{014}									% <-- Nummer des Übungszettels
 \newcommand{\veranstaltung}{Datenbanksysteme}	% <-- Name der Lehrveranstaltung eintragen
 \newcommand{\semester}{SoSe 18}						% <-- z.B. SoSo 17, WiSe 17/18
 \newcommand{\studenten}{Eduard Beiline, Mark Niehues, Antoen Oehler}			% <-- Hier eure Namen eintragen
@@ -15,15 +15,7 @@
 \begin{document}
 \input{../src/titlepage}										% erstellt die Titelseite
 
-
-
 \section{Task 1}
-\begin{enumerate}
-\item Entitätstyp Ball mit Attribut Radius
-\item Arzt - Patienten: Alle Patienten haben einen Arzt, aber ein Arzt kann N Patienten haben
-\item Patienten - Pfleger: Sowohl können Patienten von N Pflegern als auch Pfleger M Patienten haben
-\item Studenten helfen Studenten. N-zu-M Relation
-\end{enumerate}
 
 \section{Task 2}
 \begin{itemize}
@@ -34,27 +26,21 @@
   \item Reinigung(\dashuline{RName}, \dashuline{ZNummer}, Tag)
 \end{itemize}
 
-\subsection{}
-\begin{figure}[htbp]
-  \centering
-    %  \includegraphics[width=0.7\textwidth]{erm_1.png}
-  \caption{Modell 1}
-\end{figure}
-
-\subsection{}
-\begin{figure}[htbp]
-  \centering
-    %  \includegraphics[width=0.7\textwidth]{erm_2.png}
-  \caption{Modell 2}
-\end{figure}
-
 \section{Task 3}
-% \lstinputlisting[style=html,								% Style
-% 	caption={Eine Website},		% Beschriftung
-% 	firstnumber={1},										% Start der Nummerierung
-% 	firstline={0}											% 1. Codezeile
-% ]											% letzte Codezeile
-% {./src/www/views/index.tpl}
+
+\section{Task 4}
+\lstinputlisting[style=html,								% Style
+	caption={Facebook Chart},		% Beschriftung
+ 	firstnumber={1},										% Start der Nummerierung
+ 	firstline={0}											% 1. Codezeile
+	 ]											% letzte Codezeile
+{./src/index.html}
+
+\begin{figure}[htbp]
+  \centering
+     \includegraphics[width=0.7\textwidth]{src/screenshot.png}
+  \caption{Screenshot der erstellten Grafiken}
+\end{figure}
 
 \printbibliography %hier Bibliographie ausgeben lassen
 
