@@ -17,15 +17,13 @@
 
 
 
-\section{Task 1}
-\begin{enumerate}
-\item Entitätstyp Ball mit Attribut Radius
-\item Arzt - Patienten: Alle Patienten haben einen Arzt, aber ein Arzt kann N Patienten haben
-\item Patienten - Pfleger: Sowohl können Patienten von N Pflegern als auch Pfleger M Patienten haben
-\item Studenten helfen Studenten. N-zu-M Relation
-\end{enumerate}
+\section*{Task 1: ER-Modellierung}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.6\textwidth]{1.png}
+\end{figure}
 
-\section{Task 2}
+\section*{Task 2: Relationales Modell}
 \begin{itemize}
   \item Zimmer(\underline{ZNummer}, Etage)
   \item Gast(\underline{GName}, Kreditkartennumer)
@@ -34,27 +32,20 @@
   \item Reinigung(\dashuline{RName}, \dashuline{ZNummer}, Tag)
 \end{itemize}
 
-\subsection{}
+\section*{Task 3: Reverse Engineering}
 \begin{figure}[htbp]
   \centering
-    %  \includegraphics[width=0.7\textwidth]{erm_1.png}
-  \caption{Modell 1}
+  \includegraphics[width=0.6\textwidth]{3.png}
 \end{figure}
 
-\subsection{}
-\begin{figure}[htbp]
-  \centering
-    %  \includegraphics[width=0.7\textwidth]{erm_2.png}
-  \caption{Modell 2}
-\end{figure}
-
-\section{Task 3}
-% \lstinputlisting[style=html,								% Style
-% 	caption={Eine Website},		% Beschriftung
-% 	firstnumber={1},										% Start der Nummerierung
-% 	firstline={0}											% 1. Codezeile
-% ]											% letzte Codezeile
-% {./src/www/views/index.tpl}
+\section*{Task 4: Apple Aktienchart}
+\lstinputlisting[style=html,								% Style
+	caption={Apple Actionchart},		% Beschriftung
+	firstnumber={1},										% Start der Nummerierung
+	firstline={0}											% 1. Codezeile
+]											% letzte Codezeile
+{./src/index.html}
+F"ur die JavaScript-Dateien, siehe https://github.com/flot/flot.
 
 \printbibliography %hier Bibliographie ausgeben lassen
 
