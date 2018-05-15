@@ -1,0 +1,5 @@
+Block(_BlockHash_, ..BlockHash..(Previous) , MerkleRoot, Version, Nonce, DifficultyTarget, Timestamp)
+Transaction(_TransactionHash_, ..BlockHash.., Version)
+Transfer(..TransactionHash.., Value, ..WalletPubKey..(Sender), ..WalledPubKey..(Receiver))
+Wallet(_WalletPubKey_, WalltedPrivKey, ..UserID..)
+User(_UserID_)
