@@ -1,0 +1,3 @@
+[submodule "U4/Apriori"]
+	path = U4/Apriori
+	url = https://github.com/asaini/Apriori.git
