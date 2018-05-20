@@ -1,0 +1,127 @@
+\input{../src/header}											% bindet Header ein (WICHTIG)
+
+\newcommand{\dozent}{Prof. Dr. Agnès Voisard \\ Nicolas Lehmann}					% <-- Names des Dozenten eintragen
+\newcommand{\tutor}{Toni Draßdo}						% <-- Name eurer Tutoriun eintragen
+\newcommand{\tutoriumNo}{04}				% <-- Nummer im KVV nachschauen
+\newcommand{\ubungNo}{014}									% <-- Nummer des Übungszettels
+\newcommand{\veranstaltung}{Datenbanksysteme}	% <-- Name der Lehrveranstaltung eintragen
+\newcommand{\semester}{SoSe 18}						% <-- z.B. SoSo 17, WiSe 17/18
+\newcommand{\studenten}{Eduard Beiline, Mark Niehues, Antoen Oehler}			% <-- Hier eure Namen eintragen
+\addbibresource{./src/lit.bib} %Bibliographiedateien laden
+
+\usepackage[normalem]{ulem}
+
+% /////////////////////// BEGIN DOKUMENT /////////////////////////
+\begin{document}
+\input{../src/titlepage}										% erstellt die Titelseite
+
+
+
+\section*{Task 1: ER-Modellierung}
+
+
+\section*{Task 2: Relationales Modell}
+
+
+\section*{Task 3: Reverse Engineering}
+
+\section*{Task 4: Data Mining}
+\subsection*{1 - K-Means}
+\begin{figure}[h!]
+\begin{verbatim}
+Center for this Cluster: [ 6.66666667  9.66666667  1.66666667]
+Contains:
+[ 3 10  1]
+[10 10  3]
+[7 9 1]
+
+Center for this Cluster: [ 7.33333333  3.66666667  1.66666667]
+Contains:
+[9 2 3]
+[9 4 1]
+[4 5 1]
+
+Center for this Cluster: [ 5.   4.5  6.5]
+Contains:
+[6 6 8]
+[4 3 5]
+\end{verbatim}
+\caption{Ergebnis des K-Means Algorithmus}
+\end{figure}
+
+\lstinputlisting[style=py,								% Style
+	caption={K-Means Implementierung},		% Beschriftung
+	firstnumber={1},										% Start der Nummerierung
+	firstline={0}											% 1. Codezeile
+]											% letzte Codezeile
+{./src/4_1.py}
+
+\subsection*{2 - Naive Bayes}
+\subsubsection*{1 - Wahrscheinlichkeit einer Grippe bei laufender Nase}
+Naive Bayes Formula:
+\begin{equation}
+P(C|x) = \frac{P(C)\, P(x|C)}{P(x)}
+\label{bayes}
+\end{equation}
+Aus Formel \ref{bayes} folgt für die Wahrscheinlichkeit an einer Grippe zu leiden, bei laufender Nase:
+
+\begin{equation}
+P(Grippe|Nase) = \frac{P(Gripp)\, P(Nase|Grippe)}{P(Nase)}
+\label{eq1}
+\end{equation}
+wobei:
+
+\begin{align*}
+&P(Nase) = 4/8 = 1/2 \\
+&P(Grippe) = 1/2 \\
+&P(Nase|Grippe) = 3/4
+\end{align*}
+
+Durch einsetzen in Formel \ref{eq1} erhält man:
+
+\begin{equation*}
+P(Grippe|Nase) = 3/4
+\end{equation*}
+
+\subsubsection*{2 - Grippe, wenn X}
+Um die Frage zu beantwortet, ob jemand eher Grippe oder keine Grippe besitzt wird, um die Rechnung zu Vereinfachen der Quotient aus $P(Grippe|x)$ und $P(\neg Grippe|x)$ gebildet, dadurch kürzt sich die aufwändig zu berechnende Evidenz $P(x)$ heraus:
+
+\begin{equation}
+Q = \frac{P(Grippe|x)}{P(\neg Grippe|x)} = \frac{P(x|Grippe) \, P(Grippe)}{P(x|\neg Grippe) \, P(\neg Grippe)}
+\end{equation}
+
+wobei:
+
+\begin{align*}
+& x = \{Schüttelfrost, schwache Kopfschmerzen, Fieber\} \\
+& P(Schüttelfrost|Grippe) = 3/4 \\
+& P(Schüttelfrost|\neg Grippe) = 1/2 \\
+& P(schwache Kopfschmerzen|Grippe) = 1/4 \\
+& P(schwache Kopfschmerzen|\neg Grippe) = 1/4 \\
+& P(Fieber|Grippe) = 1/2 \\
+& P(Fieber|\neg Grippe) = 1/2 \\
+& P(Grippe) = P(\neg Grippe) = 1/2 \\
+\end{align*}
+Unter Annahme der (hinreichenden) Unabhängigkeit der Variablen, gilt $P(x_1, x_2 |C) = P(x_1|C)\, P(x_2|C)$.
+
+Daraus ergibt sich schließlich:
+\begin{equation*}
+Q = \frac{\frac{3}{4} \, \frac{1}{4}\, \frac{1}{2}}{\frac{1}{2} \, \frac{1}{4}\, \frac{1}{2}} = 3/2
+\end{equation*}
+
+Aus der $Q > 1$ folgt, dass der Patient wahrscheinlicher Grippe hat als keine.
+
+\subsection*{3 - Apriori}
+\lstinputlisting[								% Style
+	caption={Ergebnis des Apriori Algorithmus unter Zuhilfename der Implementierung aus \cite{github}.},		% Beschriftung
+	firstnumber={1},										% Start der Nummerierung
+	firstline={0}											% 1. Codezeile
+]											% letzte Codezeile
+{./src/4_3_output.txt}
+
+\subsection*{4 - Lineare Regression}
+Leider ist bei uns erst eine Korrektur eingetragen, deswegen können wir keine lineare Regression durchführen (unterbestimmtes System).
+
+\printbibliography %hier Bibliographie ausgeben lassen
+
+\end{document}
