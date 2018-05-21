@@ -47,10 +47,14 @@ def k_means(data, k, sigma):
     centers = data[np.random.randint(data.shape[0], size=k)]
     
     dist = sigma + 1
+    i = 0
     while dist > sigma:
+        i+=1
         # Assign data points to centers
         clusters = expectation(data, centers)
-        
+        print(":::::Centers and their Clusters at Step " + str(i))
+        print_clusters(centers, clusters)
+        print()
         # Calculate new centers
         new_centers = minimization(clusters)
         
@@ -71,5 +75,6 @@ def print_clusters(centers, clusters):
 
 
 centers, clusters = k_means(DATA, k=3, sigma=3/4)
+print(":::::Final Centers and their Clusters:")
 print_clusters(centers, clusters)
 

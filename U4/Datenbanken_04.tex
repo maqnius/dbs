@@ -27,32 +27,21 @@
 
 \section*{Task 4: Data Mining}
 \subsection*{1 - K-Means}
-\begin{figure}[h!]
-\begin{verbatim}
-Center for this Cluster: [ 6.66666667  9.66666667  1.66666667]
-Contains:
-[ 3 10  1]
-[10 10  3]
-[7 9 1]
+Der Log des K-Mean Aufrufs ist in Listing \ref{log} angegeben. Der dazugehörige entwickelte Code in Listing \ref{code}.
 
-Center for this Cluster: [ 7.33333333  3.66666667  1.66666667]
-Contains:
-[9 2 3]
-[9 4 1]
-[4 5 1]
-
-Center for this Cluster: [ 5.   4.5  6.5]
-Contains:
-[6 6 8]
-[4 3 5]
-\end{verbatim}
-\caption{Ergebnis des K-Means Algorithmus}
-\end{figure}
+\lstinputlisting[							% Style
+	caption={Log File des K-Means Algorithmus},		% Beschriftung
+	firstnumber={1},										% Start der Nummerierung
+	firstline={0},
+	label = {log}											% 1. Codezeile
+]											% letzte Codezeile
+{./src/4_1_output.txt}
 
 \lstinputlisting[style=py,								% Style
 	caption={K-Means Implementierung},		% Beschriftung
 	firstnumber={1},										% Start der Nummerierung
-	firstline={0}											% 1. Codezeile
+	firstline={0},
+	label={code}										% 1. Codezeile
 ]											% letzte Codezeile
 {./src/4_1.py}
 
@@ -112,16 +101,70 @@ Q = \frac{\frac{3}{4} \, \frac{1}{4}\, \frac{1}{2}}{\frac{1}{2} \, \frac{1}{4}\,
 Aus der $Q > 1$ folgt, dass der Patient wahrscheinlicher Grippe hat als keine.
 
 \subsection*{3 - Apriori}
+\def\arraystretch{1.5}%  1 is the default, change whatever you need
+\begin{table}[h]
+\centering
+\caption{Ausschnitt aus der Berechnung der Supports durch Kombinatorik und Abzählen}
+\begin{tabular}{l | l | l | l | l}
+$C_0$ & $L_0$ & $C_1$ & $L_1$ & $C_2$ \\ \hline
+sup(\{A\}) = $\frac{1}{2}$ & \{A\} & sup(\{A,B\}) = $\frac{1}{2}$ & \{A,B\} & ... \\
+sup(\{B\}) = $\frac{5}{6}$ & \{B\} & sup(\{A,C\}) = $\frac{1}{3}$ & \{A,E\} & ... \\
+sup(\{C\}) = $\frac{1}{2}$ & \{C\} & sup(\{A,D\}) = $\frac{1}{3}$ & \{B,C\} & ... \\
+sup(\{D\}) = $\frac{5}{6}$ & \{D\} & sup(\{A,E\}) = $\frac{2}{3}$ & \{B,D\} & ... \\
+sup(\{E\}) = $\frac{5}{6}$ & \{E\} & sup(\{A,F\}) = $\frac{1}{6}$ & \{B,E\} & ... \\
+sup(\{F\}) = $\frac{1}{2}$ & \{F\} & sup(\{B,C\}) = $\frac{1}{2}$ & \{C,D\} & ... \\
+& & sup(\{B,D\}) = $\frac{2}{3}$ & \{D,E\} & ... \\
+& & sup(\{B,E\}) = $\frac{2}{3}$ & \{D,F\} & ... \\
+& & sup(\{B,F\}) = $\frac{1}{3}$ & \{E,F\} & ... \\
+& & sup(\{C,D\}) = $\frac{1}{2}$ & & ... \\
+& & sup(\{C,E\}) = $\frac{1}{3}$ & & ... \\
+& & sup(\{C,F\}) = $\frac{1}{6}$ & & ... \\
+& & sup(\{D,E\}) = $\frac{2}{3}$ & & ... \\
+& & sup(\{D,F\}) = $\frac{1}{2}$ & & ... \\
+& & sup(\{E,F\}) = $\frac{1}{2}$ & & ... \\
+\end{tabular}
+\end{table}
+
+Die Supports werden anschließend wiederum kombiniert um Beziehungen der Form $\{A,B\} \rightarrow \{C\}$ zu bewerten. Die sogenannte \textit{confidence} berechnet sich aus den Support als:
+\begin{equation}
+conf(X \rightarrow Y) = \frac{sup(X \cup Y)}{sup(X)}
+\end{equation}
+
+Das Ergebnis der Berechnungen sei an dieser Stelle der Einfachheit halber als Textdatei angegeben:
 \lstinputlisting[								% Style
-	caption={Ergebnis des Apriori Algorithmus unter Zuhilfename der Implementierung aus \cite{github}.},		% Beschriftung
+	caption={Ergebnis des Apriori Algorithmus.},		% Beschriftung
 	firstnumber={1},										% Start der Nummerierung
-	firstline={0}											% 1. Codezeile
+	firstline={0}
 ]											% letzte Codezeile
 {./src/4_3_output.txt}
 
 \subsection*{4 - Lineare Regression}
-Leider ist bei uns erst eine Korrektur eingetragen, deswegen können wir keine lineare Regression durchführen (unterbestimmtes System).
+Leider ist bei uns erst eine Korrektur eingetragen, daher nehmen wir für diese Aufgabe folgende Noten an:
+\begin{table}[h]
+\centering
+\caption{Bisherige Notenverteilung}
+\begin{tabular}{l | c c c}
+x & 0 & 1 & 2 \\ \hline
+y & 0,89 & 0,92 & 0,93 \\
+\end{tabular}
+\label{noten}
+\end{table}
 
+Aus Tabelle \ref{noten} folgt: $\bar{x} = 1$ und $\bar{y} = 0.91\bar{3}$.
+
+Die lineare Regression beschreibt die Daten mit einer Funktion der Art:
+\begin{equation}
+f(x) = \beta _0 + \beta _1 \, x + \epsilon
+\label{lin}
+\end{equation}
+mit
+\begin{align}
+\beta _1 & = \frac{\sum \limits_{i=1}^n (x_i - \bar{x}) \, (y - \bar{y})}{\sum \limits_{i=1}^n (x_i - \bar{x})^2} \label{beta0}\\
+\beta _0 & = \bar{y} - \beta _1 \, \bar{x} \label{beta1}\\
+\end{align}
+
+Aus Gleichung \ref{beta0} folgt $\beta _1 = 0,02$ und damit $\beta _0 = 0.893$.
+Aus der linearen Gleichung \ref{lin} ergibt sich also für den nächsten Zettel $f(3) = 0,953$.
 \printbibliography %hier Bibliographie ausgeben lassen
 
 \end{document}

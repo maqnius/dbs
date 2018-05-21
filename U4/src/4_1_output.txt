@@ -1,0 +1,56 @@
+:::::Centers and their Clusters at Step 1
+Center for this Cluster: [10 10  3]
+Contains:
+[10 10  3]
+[7 9 1]
+
+Center for this Cluster: [9 2 3]
+Contains:
+[9 2 3]
+[9 4 1]
+[6 6 8]
+[4 3 5]
+
+Center for this Cluster: [ 3 10  1]
+Contains:
+[ 3 10  1]
+[4 5 1]
+
+
+:::::Centers and their Clusters at Step 2
+Center for this Cluster: [ 8.5  9.5  2. ]
+Contains:
+[10 10  3]
+[7 9 1]
+
+Center for this Cluster: [ 7.    3.75  4.25]
+Contains:
+[9 2 3]
+[9 4 1]
+[6 6 8]
+[4 3 5]
+
+Center for this Cluster: [ 3.5  7.5  1. ]
+Contains:
+[ 3 10  1]
+[4 5 1]
+
+
+:::::Final Centers and their Clusters:
+Center for this Cluster: [ 8.5  9.5  2. ]
+Contains:
+[10 10  3]
+[7 9 1]
+
+Center for this Cluster: [ 7.    3.75  4.25]
+Contains:
+[9 2 3]
+[9 4 1]
+[6 6 8]
+[4 3 5]
+
+Center for this Cluster: [ 3.5  7.5  1. ]
+Contains:
+[ 3 10  1]
+[4 5 1]
+
