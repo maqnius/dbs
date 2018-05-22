@@ -15,15 +15,69 @@
 \begin{document}
 \input{../src/titlepage}										% erstellt die Titelseite
 
-
+\newcommand{\proj}[2]{$\Pi_\text{#1}$(\!#2\!)}
+\newcommand{\sel}[2]{$\sigma_\text{#1}$(\!#2\!)}
+\newcommand{\join}[1]{$\underset{\text{#1}}{\Join}$}
 
 \section*{Task 1: ER-Modellierung}
-
+\begin{enumerate}
+	\item \proj{Name}{ Fluggesellschaf }
+	\item \proj{Vorname, Nachname, Nationalität, Kreditkartennummer}{ Passagier }
+	\item \proj{Typ}{
+		\sel{Reichweite > 700km}{ Flugzeug }
+	}
+	\item \proj{Datum}{
+		\sel{Temp<Sonnenscheindauer}{ Wetter }
+	}
+\end{enumerate}
 
 \section*{Task 2: Relationales Modell}
+\begin{enumerate}
+	\item \proj{Vorname, Nachname}{
+		\sel{Datum=14.07.2014}{
+			Flug \join{PassagierID} Passagier
+		}
+	}
+	\item \proj{Alter}{
+		\sel{Nationalität = Deutsch}{
+			\sel{Flugzeug.Typ = Cessna}{
+				Passagier \join{Passagier-ID}
+					(Flug \join{Fluggesellschaft−ID}
+						(Flugzeug \join{Flugzeug-ID} Charter)
+					)
+			}
+		}
+	}
+	\item \proj{Name, Typ}
+	{
+		Flugzeug
+		\join{Flugzeug−ID}
+		(\sel{Niederschlagsmenge < 10 Liter}
+			{ Charter \join{$p$} Wetter }
+		)
+	}
 
+	wobei $p$ = (Charter.bis-Datum = Wetter.Datum $\vee$
+		Charter.von-Datum = Wetter.Datum)
+\end{enumerate}
 
 \section*{Task 3: Reverse Engineering}
+\begin{enumerate}
+	\item
+		\proj{Vorname,Nachname,Kreditkartennummer}{
+			\sel{Name=RyanAir}{
+				(Passagier \join{Passagier-ID}
+				(Fluggesellschaft \join{Fluggesellschaft-ID} Flug))
+			}
+		}
+	\item
+		\proj{Name}{
+			\sel{Passagierkamazität < 400}{
+				(Fluggesellschaft \join{Fluggesellschaft-ID}
+				(Flugzeug \join{Flugzeug-ID} Charter))
+			}
+		}
+\end{enumerate}
 
 \section*{Task 4: Data Mining}
 \subsection*{1 - K-Means}
