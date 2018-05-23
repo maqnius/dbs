@@ -5,10 +5,7 @@ name = "pypi"
 
 [packages]
 numpy = "*"
-pandas = "*"
-ipykernel = "*"
-jupyter = "*"
-matplotlib = "*"
+"psycopg2-binary" = "*"
 
 [dev-packages]
 
