@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     try:
         # Set up database connection
-        db = init_db(config['database'], config.getboolean('main', 'create_tables'))
+        db = init_db(config['database'], config.getboolean('main', 'empty_db'))
     except KeyError:
         sys.exit("No database section in config file")
 

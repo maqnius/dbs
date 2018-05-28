@@ -1,18 +1,24 @@
 import psycopg2
 
+"""
+This is where the magic happens!
 
-def init_db(config, create_tables=False):
+"""
+
+
+def init_db(config, empty_db=False):
 
     # Connect to database
     db = psycopg2.connect(**config)
 
-    if create_tables:
-        create_tables(db)
+    if empty_db:
+        # Create tables if no tables yet
+        _create_db(db)
 
     return db
 
 
-def create_tables(db):
+def _create_db(db):
     # Create tables
     # Fill with content
     _parse_files(db)
