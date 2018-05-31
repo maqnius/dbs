@@ -16,6 +16,5 @@
 __pycache__
 !Projekt/*.xml
 .idea
-Projekt/app/data/*
-!Projekt/app/data/.keep
+
 
