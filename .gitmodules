@@ -1,6 +1,3 @@
 [submodule "U4/Apriori"]
 	path = U4/Apriori
 	url = https://github.com/asaini/Apriori.git
-[submodule "U5/overleaf_projekt_repo"]
-	path = U5/overleaf_projekt_repo
-	url = https://git.overleaf.com/16392180fhvjpsrmfmty

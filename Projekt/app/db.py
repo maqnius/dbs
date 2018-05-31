@@ -9,7 +9,6 @@ This is where the magic happens!
 
 
 def init_db(config):
-
     # Connect to database
     db = psycopg2.connect(**config)
     return db
@@ -33,3 +32,4 @@ if __name__ == '__main__':
     _create_tables(db)
     _parse_files(db)
     db.close()
+
