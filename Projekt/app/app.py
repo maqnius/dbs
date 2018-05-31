@@ -1,15 +1,14 @@
 from gevent import monkey
 monkey.patch_all()
 
-import configparser
 import os
 import sys
 from bottle import run, get, template, abort, static_file, debug, redirect
 from db import init_db
+from appconfig import config
 
 
 # Name of config File
-CONFIG_FILE = 'main.conf'
 
 """
 Configured Sites
@@ -63,16 +62,9 @@ def mount_routes(db):
 
 
 if __name__ == '__main__':
-    # Read config file
-    config = configparser.ConfigParser()
-    try:
-        config.read(CONFIG_FILE)
-    except OSError as e:
-        sys.exit(e)
-
     try:
         # Set up database connection
-        db = init_db(config['database'], config.getboolean('main', 'empty_db'))
+        db = init_db(config['database'])
     except KeyError:
         sys.exit("No database section in config file")
 
