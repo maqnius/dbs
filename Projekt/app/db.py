@@ -42,15 +42,15 @@ def _create_temporary_tables(db):
 
     # For transaction_input.csv
     cur.execute(models.TXINPUT)
-    converts.fill_table(cur=cur, path=converts.get_file('transactions_input.csv'), **models.CONF_TXINPUT)
+    converts.fill_table(cur=cur, **converts.CONF_TXINPUT)
 
     # For transaction_output.csv
     cur.execute(models.TXOUTPUT)
-    converts.fill_table(cur=cur, path=converts.get_file('transactions_output.csv'), **models.CONF_TXOUTPUT)
+    converts.fill_table(cur=cur, **converts.CONF_TXOUTPUT)
 
     # For transaction_blocks.csv
     cur.execute(models.TXBLOCKS)
-    converts.fill_table(cur=cur, path=converts.get_file('transactions_blocks.csv'), **models.CONF_TXBLOCKS)
+    converts.fill_table(cur=cur, **converts.CONF_TXBLOCKS)
 
     # Commit to make changes persistent
     db.commit()

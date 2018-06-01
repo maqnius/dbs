@@ -23,32 +23,3 @@ TXBLOCKS = ("CREATE TABLE txblocks ("
             "timestamp bigint "
             ");")
 
-
-CONF_TXBLOCKS = {
-    'table': 'txblocks',
-    'col_names': ['txid', 'blockid', 'timestamp'],
-    'use_cols': (0, 1, 6),
-    'skip_rows': 1
-}
-
-
-CONF_TXINPUT = {
-    'table': 'txinput',
-    'col_names': ['txid', 'walletid', 'walletsign', 'timestamp'],
-    'use_cols': (0, 1, 4),
-    'skip_rows': 1,
-    'convert': {
-        '1': convert_input_string
-    }
-}
-
-
-CONF_TXOUTPUT = {
-    'table': 'txoutput',
-    'col_names': ['txid', 'satoshis', 'walletid', 'timestamp'],
-    'use_cols': (0, 1, 2, 4),
-    'skip_rows': 1,
-    'convert': {
-        '2': convert_output_string
-    }
-}

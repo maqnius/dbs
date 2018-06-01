@@ -52,7 +52,7 @@ def convert_output_string(output_string):
         return ''
 
 
-def get_file(name):
+def _get_file(name):
     """
     Returns the path to a source file. It looks up the DATA folder and
     adds a 'test_' at the beginning of the path if TEST_FILES is True.
@@ -143,3 +143,34 @@ def fill_table(cur, path, table, col_names, skip_rows=0, use_cols=(), convert={}
             cur.execute(execute_string, tuple(entries))
 
 
+CONF_TXBLOCKS = {
+    'path': _get_file('transactions_blocks.csv'),
+    'table': 'txblocks',
+    'col_names': ['txid', 'blockid', 'timestamp'],
+    'use_cols': (0, 1, 6),
+    'skip_rows': 1
+}
+
+
+CONF_TXINPUT = {
+    'path': _get_file('transactions_input.csv'),
+    'table': 'txinput',
+    'col_names': ['txid', 'walletid', 'walletsign', 'timestamp'],
+    'use_cols': (0, 1, 4),
+    'skip_rows': 1,
+    'convert': {
+        '1': convert_input_string
+    }
+}
+
+
+CONF_TXOUTPUT = {
+    'path': _get_file('transactions_output.csv'),
+    'table': 'txoutput',
+    'col_names': ['txid', 'satoshis', 'walletid', 'timestamp'],
+    'use_cols': (0, 1, 2, 4),
+    'skip_rows': 1,
+    'convert': {
+        '2': convert_output_string
+    }
+}
