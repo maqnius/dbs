@@ -7,7 +7,9 @@ die API werden und anschließend eine Javascript Methode `processData` übergebe
 1. Erstelle und starte eine *leere* Postgresql Datenbank und ändere die `main.conf` entsprechend.
 2. Kopiere die Dateien  `transactions_input.csv`, `transactions_output.csv` und `transactions_blocks.csv`
 in den Ordner `data`.
-3. Führe `python db.py` aus.
+3. Führe `python --scratch db.py` aus. `--scratch` sorgt dafür, dass alle existierenden Tabellen gedropt werden
+und die Datenbank von Grundauf aufgebaut wird. Ohne diesen Parameter wird versucht, das ER-Modell auf Grundlage der
+bereits in eine Datenbank gegossenen CSV-Files, umzusetzen.
 
 ## Datenmigration
 ### Head `transactions_input.csv`
