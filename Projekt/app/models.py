@@ -2,8 +2,7 @@
 TXINPUT = ("CREATE TABLE txinput ("
             "id serial primary key, " 
             "txid varchar, "
-            "walletid varchar, "
-            "walletsign varchar, "
+            "wallet varchar, "
             "timestamp timestamp "
             ");")
 
@@ -12,7 +11,7 @@ TXOUTPUT = ("CREATE TABLE txoutput ("
             "id serial primary key, "
             "txid varchar, "
             "satoshis bigint, "
-            "walletid varchar, "
+            "wallet varchar, "
             "timestamp timestamp "
             ");")
 

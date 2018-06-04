@@ -43,23 +43,25 @@ def _create_temporary_tables():
     cur.execute(models.TXINPUT)
     print("Filling txinput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXINPUT)
+    db.commit()
     print("Parsed {} Entries ({} Errors)".format(written + errors, errors))
 
     # For transaction_output.csv
     cur.execute(models.TXOUTPUT)
     print("Filling txoutput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXOUTPUT)
+    db.commit()
     print("Parsed {} Entries ({} Errors)".format(written + errors, errors))
 
     # For transaction_blocks.csv
     cur.execute(models.TXBLOCKS)
     print("Filling txblocks table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXBLOCKS)
+    db.commit()
     print("Parsed {} Entries ({} Errors)".format(written + errors, errors))
 
     cur.close()
-    # Commit to make changes persistent
-    db.commit()
+
 
 def _drop_temporary_tables():
     """

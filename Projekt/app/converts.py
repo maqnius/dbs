@@ -7,58 +7,11 @@ import time
 from exceptions import ParseException
 
 
-def convert_input_string(input_string):
-    """
-    Searches an input string for signature and pubkey
-
-    TODO:
-        - Hash pubkey to get walletid
-
-    Parameters
-    ----------
-    input_string
-
-    Returns
-    -------
-    tuple | ''
-        First element is the signature, the second is the pubkey.
-        If any of both is not found, an empty string is returned in order
-        to mark an falsy column value.
-
-    """
-    keys = re.findall(r'\[(\w+)\]', input_string)
-
-    if len(keys) == 2:
-        return keys
-    if len(keys) == 1:
-        return keys + ['']
+def convert_basestring(base_string):
+    if 27 <= len(base_string) <= 34:
+        return base_string
     else:
-        raise ParseException("Could not find input keys from script")
-
-
-def convert_output_string(output_string):
-    """
-    Searches an output string for the walletid
-
-    Parameters
-    ----------
-    output_string: str
-        Bitcoin output string
-
-    Returns
-    -------
-    str | ''
-        Returns the walletid or an empty string to mark falsy column value
-
-    """
-    keys = re.findall(r'\[(.+)\]', output_string)
-
-    if len(keys) == 2:
-        return keys
-    elif len(keys) == 1:
-        return keys + ['']
-    else:
-        raise ParseException("Could not parse one or two output keys from script.")
+        raise ParseException("Address is not between 27 and 34 characters long")
 
 
 def convert_timestamp(timestamp):
@@ -140,7 +93,6 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
 
                 # If you came until here, you can finally add the values to the table
                 cur.execute(execute_string, tuple(entries))
-                db.commit()
                 written += 1
             except ParseException as e:
                 # Not all columns could be parsed
@@ -190,18 +142,21 @@ CONF_TXBLOCKS = {
     'table': 'txblocks',
     'col_names': ['txid', 'blockid', 'timestamp'],
     'use_cols': (0, 1, 6),
-    'skip_rows': 1
+    'skip_rows': 1,
+    'convert': {
+        '6': convert_timestamp
+    }
 }
 
 
 CONF_TXINPUT = {
     'path': _get_file('transactions_input.csv'),
     'table': 'txinput',
-    'col_names': ['txid', 'walletid', 'walletsign', 'timestamp'],
-    'use_cols': (0, 1, 4),
+    'col_names': ['txid', 'wallet', 'timestamp'],
+    'use_cols': (0, 3, 4),
     'skip_rows': 1,
     'convert': {
-        '1': convert_input_string,
+        '3': convert_basestring,
         '4': convert_timestamp
     }
 }
@@ -210,11 +165,11 @@ CONF_TXINPUT = {
 CONF_TXOUTPUT = {
     'path': _get_file('transactions_output.csv'),
     'table': 'txoutput',
-    'col_names': ['txid', 'satoshis', 'walletid', 'timestamp'],
-    'use_cols': (0, 1, 2, 4),
+    'col_names': ['txid', 'satoshis', 'wallet', 'timestamp'],
+    'use_cols': (0, 1, 3, 4),
     'skip_rows': 1,
     'convert': {
-        '2': convert_output_string,
+        '3': convert_basestring,
         '4': convert_timestamp
     }
 }
