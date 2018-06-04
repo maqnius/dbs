@@ -1,37 +1,37 @@
 # Temporary models
 TXINPUT = ("CREATE TABLE txinput ("
             "id serial primary key, " 
-            "txid varchar, "
-            "wallet varchar, "
+            "txid char(64), "
+            "wallet char(34), "
             "timestamp timestamp "
             ");")
 
 
 TXOUTPUT = ("CREATE TABLE txoutput ("
             "id serial primary key, "
-            "txid varchar, "
+            "txid char(64), "
             "satoshis bigint, "
-            "wallet varchar, "
+            "wallet varchar(34), "
             "timestamp timestamp "
             ");")
 
 
 TXBLOCKS = ("CREATE TABLE txblocks ("
-            "txid varchar primary key , "
-            "blockid varchar , "
+            "txid char(64) primary key , "
+            "blockid char(64) , "
             "timestamp timestamp "
             ");")
 
 
 # Final Models
 TXS = ("CREATE TABLE txs ("
-        "txid varchar primary key , "
-        "blockid varchar , "
+        "txid char(64) primary key , "
+        "blockid char(64) , "
         "timestamp bigint "
         ");")
 
 
-TRANSFER = ("CREATE TABLE transfer ("
+TRANSFER = ("CREATE TABLE transfer as ("
             "txid varchar, "
             "satoshis bigint, "
             "from_wallet varchar, "

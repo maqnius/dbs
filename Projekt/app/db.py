@@ -38,9 +38,10 @@ def _create_temporary_tables():
 
     """
     cur = db.cursor()
-
+    """
     # For transaction_input.csv
     cur.execute(models.TXINPUT)
+    db.commit()
     print("Filling txinput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXINPUT)
     db.commit()
@@ -48,13 +49,16 @@ def _create_temporary_tables():
 
     # For transaction_output.csv
     cur.execute(models.TXOUTPUT)
+    db.commit()
     print("Filling txoutput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXOUTPUT)
     db.commit()
     print("Parsed {} Entries ({} Errors)".format(written + errors, errors))
+    """
 
     # For transaction_blocks.csv
     cur.execute(models.TXBLOCKS)
+    db.commit()
     print("Filling txblocks table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXBLOCKS)
     db.commit()
@@ -85,6 +89,7 @@ def _drop_temporary_tables():
 if __name__ == '__main__':
     _drop_temporary_tables()
     _create_temporary_tables()
+
     # _create_tables()
     db.close()
 
