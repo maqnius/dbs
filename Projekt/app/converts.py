@@ -126,7 +126,8 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
         ','.join(['%s']*len(col_names))
     )
 
-    errors = []
+    errors = 0
+    written = 0
     with open(path, newline='') as file:
         reader = csv.reader(file, delimiter=',')
         for row_ix, row in enumerate(reader):
@@ -140,15 +141,16 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
                 # If you came until here, you can finally add the values to the table
                 cur.execute(execute_string, tuple(entries))
                 db.commit()
+                written += 1
             except ParseException as e:
                 # Not all columns could be parsed
-                errors.append(row)
+                errors += 1
             except IntegrityError:
                 # Already entry in table
-                errors.append(row)
+                errors += 1
                 db.rollback()
 
-    return errors
+    return errors, written
 
 
 def _parse_row(row, convert, fill_missing, use_cols):
