@@ -1,4 +1,6 @@
 import psycopg2
+from psycopg2.sql import SQL, Identifier
+import sys
 from appconfig import config
 import models
 import converts
@@ -50,7 +52,6 @@ def _create_temporary_tables():
     print("Wrote {} entries into the database:".format(written))
     print(error_stat(errors))
 
-
     # For transaction_output.csv
     cur.execute(models.TXOUTPUT)
     db.commit()
@@ -74,29 +75,33 @@ def _create_temporary_tables():
     cur.close()
 
 
-def _drop_temporary_tables():
+def _drop_tables(tables):
     """
-    Drops temporary tables (temporary step only,
-    if input code is finished this step will
-    be dropped
+    Drops given tables
+
+    Parameters
+    ----------
+    tables: List
+        List of table names
 
     """
+
     cur = db.cursor()
 
-    cur.execute("DROP TABLE if exists txinput;")
-    cur.execute("DROP TABLE if exists txoutput;")
-    cur.execute("DROP TABLE if exists txblocks;")
+    for table in tables:
+        cur.execute(SQL("DROP TABLE IF EXISTS {}").format(Identifier(table)))
 
     db.commit()
     cur.close()
 
-    cur.close()
-
 
 if __name__ == '__main__':
-    _drop_temporary_tables()
-    _create_temporary_tables()
+    if "--scratch" in sys.argv:
+        # Deletes grounding Database and builds up everything from scratch
+        _drop_tables(["txinput", "txoutput", "txblocks"])
+        _create_temporary_tables()
 
-    # _create_tables()
+    _drop_tables(['txs', 'transfer', 'wallets', 'users'])
+    _create_tables()
     db.close()
 
