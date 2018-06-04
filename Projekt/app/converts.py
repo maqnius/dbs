@@ -23,17 +23,14 @@ def convert_input_string(input_string):
         to mark an falsy column value.
 
     """
-    m = re.search(r'PUSHDATA\(\d+\)\[(.+)\]\s*PUSHDATA\(\d+\)\[(.+)\]', input_string)
-    try:
-        result = (m.group(1), m.group(2))
-    except (IndexError, AttributeError):
-        raise TypeError(input_string)
+    keys = re.findall(r'PUSHDATA\(\d+\)\[(.+)\]\s*', input_string)
 
-    # If there are empty parts
-    if not all(result):
+    if len(keys) == 2:
+        return keys
+    if len(keys) == 1:
+        return keys + ['']
+    else:
         raise TypeError(input_string)
-
-    return result
 
 
 def convert_output_string(output_string):
@@ -76,7 +73,7 @@ def _get_file(name):
     path
 
     """
-    TEST_FILES = True
+    TEST_FILES = False
     DATA = './data'
 
     name = 'test_' + name if TEST_FILES else name
@@ -131,11 +128,11 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
             except (IndexError, TypeError):
                 # Not all columns could be parsed
                 errors.append(row)
-                print("Error during parsing: " + ' '.join(row))
+                print("Error during parsing: " + ', '.join(row))
             except IntegrityError:
                 # Already entry in table
                 errors.append(row)
-                print("Already exists: " + ' '.join(row))
+                print("Already exists: " + ', '.join(row))
                 db.rollback()
 
     return errors

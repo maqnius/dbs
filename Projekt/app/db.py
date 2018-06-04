@@ -41,14 +41,17 @@ def _create_temporary_tables():
 
     # For transaction_input.csv
     cur.execute(models.TXINPUT)
+    print("Filling txinput table...")
     converts.fill_table(db, **converts.CONF_TXINPUT)
 
     # For transaction_output.csv
     cur.execute(models.TXOUTPUT)
+    print("Filling txoutput table...")
     converts.fill_table(db, **converts.CONF_TXOUTPUT)
 
     # For transaction_blocks.csv
     cur.execute(models.TXBLOCKS)
+    print("Filling txblocks table...")
     converts.fill_table(db, **converts.CONF_TXBLOCKS)
 
     cur.close()
