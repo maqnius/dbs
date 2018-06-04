@@ -67,9 +67,9 @@ def _drop_temporary_tables():
     """
     cur = db.cursor()
 
-    cur.execute("DROP TABLE txinput;")
-    cur.execute("DROP TABLE txoutput;")
-    cur.execute("DROP TABLE txblocks;")
+    cur.execute("DROP TABLE if exists txinput;")
+    cur.execute("DROP TABLE if exists txoutput;")
+    cur.execute("DROP TABLE if exists txblocks;")
 
     db.commit()
     cur.close()

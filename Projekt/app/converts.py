@@ -23,7 +23,7 @@ def convert_input_string(input_string):
         to mark an falsy column value.
 
     """
-    keys = re.findall(r'PUSHDATA\(\d+\)\[(.+)\]\s*', input_string)
+    keys = re.findall(r'\[(\w+)\]', input_string)
 
     if len(keys) == 2:
         return keys
@@ -48,13 +48,13 @@ def convert_output_string(output_string):
         Returns the walletid or an empty string to mark falsy column value
 
     """
-    m = re.search(r'PUSHDATA\(\d+\)\[(.+)\]', output_string)
+    keys = re.findall(r'\[(.+)\]', output_string)
 
-    try:
-        if not m.group(1):
-            raise TypeError(output_string)
-        return m.group(1)
-    except IndexError:
+    if len(keys) == 2:
+        return keys
+    elif len(keys) == 1:
+        return keys + ['']
+    else:
         raise TypeError(output_string)
 
 
