@@ -43,7 +43,7 @@ def _create_temporary_tables():
     # For transaction_input.csv
     cur.execute(models.TXINPUT)
     db.commit()
-
+    
     print("Filling txinput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXINPUT)
     db.commit()

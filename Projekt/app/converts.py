@@ -107,7 +107,7 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
                 errors[e.code] += 1
             except IntegrityError:
                 # Already entry in table
-                errors[5] += 1
+                errors[4] += 1
                 db.rollback()
 
     return errors, written
