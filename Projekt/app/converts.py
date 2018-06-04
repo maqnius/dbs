@@ -2,6 +2,9 @@ import re
 import os
 import csv
 from psycopg2 import IntegrityError
+from datetime import datetime
+import time
+from exceptions import ParseException
 
 
 def convert_input_string(input_string):
@@ -30,7 +33,7 @@ def convert_input_string(input_string):
     if len(keys) == 1:
         return keys + ['']
     else:
-        raise TypeError(input_string)
+        raise ParseException("Could not find input keys from script")
 
 
 def convert_output_string(output_string):
@@ -55,7 +58,19 @@ def convert_output_string(output_string):
     elif len(keys) == 1:
         return keys + ['']
     else:
-        raise TypeError(output_string)
+        raise ParseException("Could not parse one or two output keys from script.")
+
+
+def convert_timestamp(timestamp):
+    if int(timestamp) > time.time():
+        timestamp = timestamp[:-3]
+
+    try:
+        date = datetime.utcfromtimestamp(int(timestamp))
+    except ValueError:
+        raise ParseException("Time is in future.")
+
+    return date.isoformat(sep=' ')
 
 
 def _get_file(name):
@@ -125,14 +140,12 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
                 # If you came until here, you can finally add the values to the table
                 cur.execute(execute_string, tuple(entries))
                 db.commit()
-            except (IndexError, TypeError):
+            except ParseException as e:
                 # Not all columns could be parsed
                 errors.append(row)
-                print("Error during parsing: " + ', '.join(row))
             except IntegrityError:
                 # Already entry in table
                 errors.append(row)
-                print("Already exists: " + ', '.join(row))
                 db.rollback()
 
     return errors
@@ -158,9 +171,9 @@ def _parse_row(row, convert, fill_missing, use_cols):
                         # No converter defined
                         entries.append(column)
                 else:
-                    raise TypeError(column)
+                    raise ParseException("Column {} is empty.".format(ix))
 
-            except TypeError as e:
+            except ParseException as e:
                 if str(ix) in fill_missing:
                     # Fill if for this column there is a fill value given
                     entries += fill_missing[str(ix)]
@@ -186,7 +199,8 @@ CONF_TXINPUT = {
     'use_cols': (0, 1, 4),
     'skip_rows': 1,
     'convert': {
-        '1': convert_input_string
+        '1': convert_input_string,
+        '4': convert_timestamp
     }
 }
 
@@ -198,6 +212,7 @@ CONF_TXOUTPUT = {
     'use_cols': (0, 1, 2, 4),
     'skip_rows': 1,
     'convert': {
-        '2': convert_output_string
+        '2': convert_output_string,
+        '4': convert_timestamp
     }
 }

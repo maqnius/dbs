@@ -4,7 +4,7 @@ TXINPUT = ("CREATE TABLE txinput ("
             "txid varchar, "
             "walletid varchar, "
             "walletsign varchar, "
-            "timestamp bigint "
+            "timestamp timestamp "
             ");")
 
 
@@ -13,14 +13,14 @@ TXOUTPUT = ("CREATE TABLE txoutput ("
             "txid varchar, "
             "satoshis bigint, "
             "walletid varchar, "
-            "timestamp bigint "
+            "timestamp timestamp "
             ");")
 
 
 TXBLOCKS = ("CREATE TABLE txblocks ("
-            "txid varchar, "
-            "blockid varchar PRIMARY KEY , "
-            "timestamp bigint "
+            "txid varchar primary key , "
+            "blockid varchar , "
+            "timestamp timestamp "
             ");")
 
 
