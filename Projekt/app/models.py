@@ -1,14 +1,16 @@
 # Temporary models
 TXINPUT = ("CREATE TABLE txinput ("
-           "txid varchar PRIMARY KEY, "
-           "walletid varchar, "
-           "walletsign varchar, "
-           "timestamp bigint "
-           ");")
+            "id serial primary key, " 
+            "txid varchar, "
+            "walletid varchar, "
+            "walletsign varchar, "
+            "timestamp bigint "
+            ");")
 
 
 TXOUTPUT = ("CREATE TABLE txoutput ("
-            "txid varchar PRIMARY KEY, "
+            "id serial primary key, "
+            "txid varchar, "
             "satoshis bigint, "
             "walletid varchar, "
             "timestamp bigint "

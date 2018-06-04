@@ -60,6 +60,7 @@ def convert_output_string(output_string):
     except IndexError:
         raise TypeError(output_string)
 
+
 def _get_file(name):
     """
     Returns the path to a source file. It looks up the DATA folder and
@@ -75,7 +76,7 @@ def _get_file(name):
     path
 
     """
-    TEST_FILES = False
+    TEST_FILES = True
     DATA = './data'
 
     name = 'test_' + name if TEST_FILES else name
@@ -121,46 +122,56 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
             if row_ix < skip_rows:
                 continue
 
-            entries = []    # will be filled with values for the database table row
-
-            for ix, column in enumerate(row):
-                if not use_cols or ix in use_cols:  # Only use data if in use_cols or no use_cols given
-                    column = column.strip()
-                    try:
-                        if column:
-                            try:
-                                converted = convert[str(ix)](column)    # Convert it convert function given
-
-                                # If we get two values from one entry. Happens with input strings
-                                if type(converted) in (list, tuple):
-                                    entries += converted
-                                else:
-                                    entries.append(converted)
-                            except KeyError:
-                                # No converter defined
-                                entries.append(column)
-                        else:
-                            raise TypeError(column)
-
-                    except TypeError as e:
-                        if str(ix) in fill_missing:
-                            # Fill if for this column there is a fill value given
-                            entries += fill_missing[str(ix)]
-                        else:
-                            break
             try:
+                entries = _parse_row(row, convert, fill_missing, use_cols)
+
                 # If you came until here, you can finally add the values to the table
                 cur.execute(execute_string, tuple(entries))
                 db.commit()
-            except IndexError:
+            except (IndexError, TypeError):
                 # Not all columns could be parsed
                 errors.append(row)
+                print("Error during parsing: " + ' '.join(row))
             except IntegrityError:
                 # Already entry in table
                 errors.append(row)
+                print("Already exists: " + ' '.join(row))
                 db.rollback()
 
     return errors
+
+
+def _parse_row(row, convert, fill_missing, use_cols):
+    entries = []
+
+    for ix, column in enumerate(row):
+        if not use_cols or ix in use_cols:  # Only use data if in use_cols or no use_cols given
+            column = column.strip()
+            try:
+                if column:
+                    try:
+                        converted = convert[str(ix)](column)    # Convert it convert function given
+
+                        # If we get two values from one entry. Happens with input strings
+                        if type(converted) in (list, tuple):
+                            entries += converted
+                        else:
+                            entries.append(converted)
+                    except KeyError:
+                        # No converter defined
+                        entries.append(column)
+                else:
+                    raise TypeError(column)
+
+            except TypeError as e:
+                if str(ix) in fill_missing:
+                    # Fill if for this column there is a fill value given
+                    entries += fill_missing[str(ix)]
+                else:
+                    raise e
+
+    return entries
+
 
 CONF_TXBLOCKS = {
     'path': _get_file('transactions_blocks.csv'),
