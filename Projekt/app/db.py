@@ -18,12 +18,14 @@ def _create_tables():
     """
     Will create the actual relations from our temporary tables
 
-    Parameters
-    ----------
-    db: database connection
-
     """
-    pass
+
+    cur = db.cursor()
+    cur.execute(models.TXS)
+    cur.execute(models.TRANSFER)
+    cur.execute(models.WALLETS)
+    cur.execute(models.USERS)
+
 
 
 def _create_temporary_tables():
@@ -31,9 +33,6 @@ def _create_temporary_tables():
     Creates temporary tables from the given input files to later
     merge those tables into our actual database scheme
 
-    Parameters
-    ----------
-    db: database connection
 
     """
     cur = db.cursor()
