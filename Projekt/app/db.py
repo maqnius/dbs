@@ -58,8 +58,27 @@ def _create_temporary_tables():
     # Commit to make changes persistent
     db.commit()
 
+def _drop_temporary_tables():
+    """
+    Drops temporary tables (temporary step only,
+    if input code is finished this step will
+    be dropped
+
+    """
+    cur = db.cursor()
+
+    cur.execute("DROP TABLE txinput;")
+    cur.execute("DROP TABLE txoutput;")
+    cur.execute("DROP TABLE txblocks;")
+
+    db.commit()
+    cur.close()
+
+    cur.close()
+
 
 if __name__ == '__main__':
+    _drop_temporary_tables()
     _create_temporary_tables()
     # _create_tables()
     db.close()
