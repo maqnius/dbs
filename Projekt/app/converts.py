@@ -1,6 +1,7 @@
 import re
 import os
 import csv
+from psycopg2 import IntegrityError
 
 
 def convert_input_string(input_string):
@@ -25,12 +26,14 @@ def convert_input_string(input_string):
     m = re.search(r'PUSHDATA\(\d+\)\[(.+)\]\s*PUSHDATA\(\d+\)\[(.+)\]', input_string)
     try:
         result = (m.group(1), m.group(2))
-    except IndexError:
-        return ''
-    except AttributeError:
-        print("Could not parse: " + input_string)
-        return ''
-    return result if all(result) else ''
+    except (IndexError, AttributeError):
+        raise TypeError(input_string)
+
+    # If there are empty parts
+    if not all(result):
+        raise TypeError(input_string)
+
+    return result
 
 
 def convert_output_string(output_string):
@@ -49,11 +52,13 @@ def convert_output_string(output_string):
 
     """
     m = re.search(r'PUSHDATA\(\d+\)\[(.+)\]', output_string)
-    try:
-        return m.group(1) or ''
-    except IndexError:
-        return ''
 
+    try:
+        if not m.group(1):
+            raise TypeError(output_string)
+        return m.group(1)
+    except IndexError:
+        raise TypeError(output_string)
 
 def _get_file(name):
     """
@@ -77,14 +82,13 @@ def _get_file(name):
     return os.path.join(DATA, name)
 
 
-def fill_table(cur, path, table, col_names, skip_rows=0, use_cols=(), convert={}, fill_missing={}):
+def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={}, fill_missing={}):
     """
     Fills table using a csv input file
 
     Parameters
     ----------
-    cur: database cursor
-        Cursor of current database connection
+    db: database connection
     path: path
         Path to source csv file
     table: str
@@ -101,12 +105,15 @@ def fill_table(cur, path, table, col_names, skip_rows=0, use_cols=(), convert={}
         Dictionary of missing values for given columns
 
     """
+    cur = db.cursor()
+
     execute_string = "INSERT INTO {} ({}) VALUES ({})".format(
         table,
         ','.join(col_names),
         ','.join(['%s']*len(col_names))
     )
 
+    errors = []
     with open(path, newline='') as file:
         reader = csv.reader(file, delimiter=',')
         for row_ix, row in enumerate(reader):
@@ -115,36 +122,45 @@ def fill_table(cur, path, table, col_names, skip_rows=0, use_cols=(), convert={}
                 continue
 
             entries = []    # will be filled with values for the database table row
+
             for ix, column in enumerate(row):
                 if not use_cols or ix in use_cols:  # Only use data if in use_cols or no use_cols given
                     column = column.strip()
+                    try:
+                        if column:
+                            try:
+                                converted = convert[str(ix)](column)    # Convert it convert function given
 
-                    missing = False if column else True
-                    if not missing:
-                        try:
-                            converted = convert[str(ix)](column)    # Convert it convert function given
+                                # If we get two values from one entry. Happens with input strings
+                                if type(converted) in (list, tuple):
+                                    entries += converted
+                                else:
+                                    entries.append(converted)
+                            except KeyError:
+                                # No converter defined
+                                entries.append(column)
+                        else:
+                            raise TypeError(column)
 
-                            # If we get two values from one entry. Happens with input strings
-                            if type(converted) in (list, tuple):
-                                entries += converted
-                            else:
-                                entries.append(converted)
-                        except KeyError:
-                            entries.append(column)
-                        except TypeError:
-                            # Type does not fit to convert function
-                            # Enter missing routine in the next step
-                            missing = True
-                    if missing:
-                        try:
+                    except TypeError as e:
+                        if str(ix) in fill_missing:
                             # Fill if for this column there is a fill value given
-                            fill_missing[str(ix)]
-                        except KeyError:
-                            break   # skips this column
+                            entries += fill_missing[str(ix)]
+                        else:
+                            break
+            try:
+                # If you came until here, you can finally add the values to the table
+                cur.execute(execute_string, tuple(entries))
+                db.commit()
+            except IndexError:
+                # Not all columns could be parsed
+                errors.append(row)
+            except IntegrityError:
+                # Already entry in table
+                errors.append(row)
+                db.rollback()
 
-            # If you came until here, you can finally add the values to the table
-            cur.execute(execute_string, tuple(entries))
-
+    return errors
 
 CONF_TXBLOCKS = {
     'path': _get_file('transactions_blocks.csv'),

@@ -39,11 +39,10 @@ TRANSFER = ("CREATE TABLE transfer ("
              ");")
 
 
-WALLETS = ("CREATE TABLE wallets ("
-            "walletid varchar PRIMARY KEY , "
-            "signature varchar, "
-            "userid int"
-             ");")
+WALLETS = ("CREATE TABLE wallets  as ("
+            "select distinct walletid, walletsign "
+            "from txinput"
+            "); ")
 
 
 USERS = ("CREATE TABLE users ("
