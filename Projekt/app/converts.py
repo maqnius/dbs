@@ -27,6 +27,9 @@ def convert_input_string(input_string):
         result = (m.group(1), m.group(2))
     except IndexError:
         return ''
+    except AttributeError:
+        print("Could not parse: " + input_string)
+        return ''
     return result if all(result) else ''
 
 
@@ -67,7 +70,7 @@ def _get_file(name):
     path
 
     """
-    TEST_FILES = True
+    TEST_FILES = False
     DATA = './data'
 
     name = 'test_' + name if TEST_FILES else name

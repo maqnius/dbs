@@ -58,6 +58,6 @@ def _create_temporary_tables():
 
 if __name__ == '__main__':
     _create_temporary_tables()
-    _create_tables()
+    # _create_tables()
     db.close()
 

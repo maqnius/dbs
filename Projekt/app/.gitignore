@@ -1,3 +1,4 @@
 data/*
 !data/test_*
 !data/CSV_Database_of_First_Names.csv
+main.conf
