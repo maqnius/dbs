@@ -31,7 +31,7 @@ TXS = ("CREATE TABLE txs ("
 
 
 TRANSFER = ("CREATE TABLE transfer ("
-            "txid varchar PRIMARY KEY, "
+            "txid varchar, "
             "satoshis bigint, "
             "from_wallet varchar, "
             "to_wallet varchar, "
@@ -48,5 +48,5 @@ WALLETS = ("CREATE TABLE wallets ("
 
 USERS = ("CREATE TABLE users ("
            "userid SERIAL PRIMARY KEY , "
-           "alias varchar, "
+           "alias varchar "
            ");")

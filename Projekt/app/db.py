@@ -26,6 +26,8 @@ def _create_tables():
     cur.execute(models.WALLETS)
     cur.execute(models.USERS)
 
+    cur.close()
+    db.commit()
 
 
 def _create_temporary_tables():
@@ -49,6 +51,7 @@ def _create_temporary_tables():
     cur.execute(models.TXBLOCKS)
     converts.fill_table(cur=cur, **converts.CONF_TXBLOCKS)
 
+    cur.close()
     # Commit to make changes persistent
     db.commit()
 
