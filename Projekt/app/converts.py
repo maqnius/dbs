@@ -11,7 +11,7 @@ def convert_basestring(base_string):
     if 27 <= len(base_string) <= 34:
         return base_string
     else:
-        raise ParseException("Address is not between 27 and 34 characters long")
+        raise ParseException("Address is not between 27 and 34 characters long", 1)
 
 
 def convert_timestamp(timestamp):
@@ -21,9 +21,17 @@ def convert_timestamp(timestamp):
     try:
         date = datetime.utcfromtimestamp(int(timestamp))
     except ValueError:
-        raise ParseException("Time is in future.")
+        raise ParseException("Time is in future.", 2)
 
     return date.isoformat(sep=' ')
+
+
+def convert_sha256(input):
+    if len(input) != 64:
+        print("ouch")
+        raise ParseException('No valid hash', 3)
+    else:
+        return input
 
 
 def _get_file(name):
@@ -79,7 +87,7 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
         ','.join(['%s']*len(col_names))
     )
 
-    errors = 0
+    errors = [0, 0, 0, 0, 0]
     written = 0
     with open(path, newline='') as file:
         reader = csv.reader(file, delimiter=',')
@@ -96,10 +104,10 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
                 written += 1
             except ParseException as e:
                 # Not all columns could be parsed
-                errors += 1
+                errors[e.code] += 1
             except IntegrityError:
                 # Already entry in table
-                errors += 1
+                errors[5] += 1
                 db.rollback()
 
     return errors, written
@@ -125,7 +133,7 @@ def _parse_row(row, convert, fill_missing, use_cols):
                         # No converter defined
                         entries.append(column)
                 else:
-                    raise ParseException("Column {} is empty.".format(ix))
+                    raise ParseException("Column {} is empty.".format(ix), 0)
 
             except ParseException as e:
                 if str(ix) in fill_missing:
@@ -144,6 +152,7 @@ CONF_TXBLOCKS = {
     'use_cols': (0, 1, 6),
     'skip_rows': 1,
     'convert': {
+        '0': convert_sha256,
         '6': convert_timestamp
     }
 }
@@ -156,6 +165,7 @@ CONF_TXINPUT = {
     'use_cols': (0, 3, 4),
     'skip_rows': 1,
     'convert': {
+        '0': convert_sha256,
         '3': convert_basestring,
         '4': convert_timestamp
     }
@@ -169,6 +179,7 @@ CONF_TXOUTPUT = {
     'use_cols': (0, 1, 3, 4),
     'skip_rows': 1,
     'convert': {
+        '0': convert_sha256,
         '3': convert_basestring,
         '4': convert_timestamp
     }
