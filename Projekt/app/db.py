@@ -9,14 +9,11 @@ This is where the magic happens!
 """
 
 
-def init_db(config):
-    # Connect to database
-    db = psycopg2.connect(**config)
-
-    return db
+# Connect to database
+db = psycopg2.connect(**config['database'])
 
 
-def _create_tables(db):
+def _create_tables():
     """
     Will create the actual relations from our temporary tables
 
@@ -28,7 +25,7 @@ def _create_tables(db):
     pass
 
 
-def _create_temporary_tables(db):
+def _create_temporary_tables():
     """
     Creates temporary tables from the given input files to later
     merge those tables into our actual database scheme
@@ -57,8 +54,7 @@ def _create_temporary_tables(db):
 
 
 if __name__ == '__main__':
-    db = init_db(config['database'])
-    _create_temporary_tables(db)
-    _create_tables(db)
+    _create_temporary_tables()
+    _create_tables()
     db.close()
 

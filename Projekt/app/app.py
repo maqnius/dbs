@@ -3,7 +3,7 @@ monkey.patch_all()
 import os
 import sys
 from bottle import run, get, template, abort, static_file, debug, redirect
-from db import init_db
+from db import db
 from appconfig import config
 
 
@@ -28,50 +28,43 @@ SITES = {
 }
 
 
-def mount_routes(db):
-    @get('/')
-    def index():
-        # Redirect to first elements of SITES
-        redirect('/' + list(SITES.keys())[0])
+@get('/')
+def index():
+    # Redirect to first elements of SITES
+    redirect('/' + list(SITES.keys())[0])
 
-    @get('/static/<filename>')
-    def server_static(filename):
-        return static_file(filename, root='./static')
 
-    @get('/api/print')
-    def just_print():
-        return {
-            'testkey': 'testvalue'
+@get('/static/<filename>')
+def server_static(filename):
+    return static_file(filename, root='./static')
+
+
+@get('/api/print')
+def just_print():
+    return {
+        'testkey': 'testvalue'
+    }
+
+
+@get('/<path:path>')
+def main_route(path):
+    try:
+        config = {
+            'api_url': os.path.join('/api/', path),
+            'cur_url': path,
+            'title': SITES[path],
+            'menu': SITES
         }
-
-    @get('/<path:path>')
-    def main_route(path):
-        try:
-            config = {
-                'api_url': os.path.join('/api/', path),
-                'cur_url': path,
-                'title': SITES[path],
-                'menu': SITES
-            }
-            return template(path, config=config)
-        except (OSError, KeyError):
-            abort(404)
+        return template(path, config=config)
+    except (OSError, KeyError):
+        abort(404)
 
 
 if __name__ == '__main__':
-    try:
-        # Set up database connection
-        db = init_db(config['database'])
-    except KeyError:
-        sys.exit("No database section in config file")
-
     if len(sys.argv) > 1 and sys.argv[1].isdigit():
         port = int(sys.argv[1])
     else:
         port = config['main']['port']
-
-    # Create routes
-    mount_routes(db)
 
     # Do not cache css/js/html files
     debug(True)
