@@ -24,10 +24,10 @@ def _create_tables():
     """
 
     cur = db.cursor()
-    cur.execute(models.TXS)
+    # cur.execute(models.TXS)
     cur.execute(models.TRANSFER)
-    cur.execute(models.WALLETS)
-    cur.execute(models.USERS)
+    # cur.execute(models.WALLETS)
+    # cur.execute(models.USERS)
 
     cur.close()
     db.commit()
