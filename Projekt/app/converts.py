@@ -160,7 +160,6 @@ CONF_TXBLOCKS = {
     'use_cols': (0, 1, 6),
     'skip_rows': 1,
     'convert': {
-        '0': convert_sha256,
         '6': convert_timestamp
     }
 }
@@ -173,8 +172,6 @@ CONF_TXINPUT = {
     'use_cols': (0, 3, 4),
     'skip_rows': 1,
     'convert': {
-        '0': convert_sha256,
-        '3': convert_basestring,
         '4': convert_timestamp
     }
 }
@@ -187,5 +184,6 @@ CONF_TXOUTPUT = {
     'use_cols': (0, 1, 3, 4),
     'skip_rows': 1,
     'convert': {
+        '4': convert_timestamp
     }
 }
