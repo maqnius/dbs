@@ -48,7 +48,6 @@ def _create_temporary_tables():
     
     print("Filling txinput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXINPUT)
-    db.commit()
     print("Wrote {} entries into the database:".format(written))
     print(error_stat(errors))
 
@@ -58,7 +57,6 @@ def _create_temporary_tables():
 
     print("Filling txoutput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXOUTPUT)
-    db.commit()
     print("Wrote {} entries into the database:".format(written))
     print(error_stat(errors))
 
@@ -68,7 +66,6 @@ def _create_temporary_tables():
 
     print("Filling txblocks table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXBLOCKS)
-    db.commit()
     print("Wrote {} entries into the database:".format(written))
     print(error_stat(errors))
 

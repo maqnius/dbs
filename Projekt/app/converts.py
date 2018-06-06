@@ -1,7 +1,7 @@
-import re
+import sys
 import os
 import csv
-from psycopg2 import IntegrityError
+from psycopg2 import IntegrityError, errorcodes
 from datetime import datetime
 import time
 from exceptions import ParseException
@@ -101,14 +101,22 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
 
                 # If you came until here, you can finally add the values to the table
                 cur.execute(execute_string, tuple(entries))
+                db.commit()
                 written += 1
             except ParseException as e:
                 # Not all columns could be parsed
                 errors[e.code] += 1
-            except IntegrityError:
-                # Already entry in table
-                errors[4] += 1
-                db.rollback()
+            except IntegrityError as e:
+                if e.pgcode == errorcodes.UNIQUE_VIOLATION:
+                    # Already entry in table
+                    db.rollback()
+
+                    # Delete duplicate and continue
+                    cur.execute("DELETE FROM txblocks WHERE txid = %s;", (row[0],))
+                    db.commit()
+                    errors[4] += 1
+                else:
+                    raise
 
     return errors, written
 
@@ -179,8 +187,5 @@ CONF_TXOUTPUT = {
     'use_cols': (0, 1, 3, 4),
     'skip_rows': 1,
     'convert': {
-        '0': convert_sha256,
-        '3': convert_basestring,
-        '4': convert_timestamp
     }
 }
