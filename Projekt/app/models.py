@@ -1,7 +1,7 @@
 # Temporary models
 TXINPUT = ("CREATE TABLE txinput ("
             "txid char(64), "
-            "wallet char(34), "
+            "wallet varchar(34), "
             "timest timestamp "
             ");")
 
@@ -9,7 +9,7 @@ TXINPUT = ("CREATE TABLE txinput ("
 TXOUTPUT = ("CREATE TABLE txoutput ("
             "txid char(64), "
             "satoshis bigint, "
-            "wallet char(34), "
+            "wallet varchar(34), "
             "timest timestamp "
             ");")
 
