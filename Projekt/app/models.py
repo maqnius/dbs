@@ -38,6 +38,6 @@ WALLETS = ("SELECT DISTINCT walletid into wallets from (select distinct transfer
 # Necessary at this point?
 USERS = ("create table users ("
          "uid varchar(20), "
-         "wallet varchar(34));")
+         "wallet varchar(34) primary key );")
 
 
