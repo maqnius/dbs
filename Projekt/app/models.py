@@ -22,7 +22,7 @@ TXBLOCKS = ("CREATE TABLE txblocks ("
 
 
 # Final Models
-TXS = ("SELECT txid, blockid, timest from txblocks where txid in (select distinct txid from tranfer)")
+TXS = ("SELECT txid, blockid, timest into transactions from txblocks where txid in (select distinct txid from transfer);")
 
 
 TRANSFER = ("SELECT input.txid, input.wallet as wallet_in, output.wallet as wallet_out, output.satoshis, output.timest "
@@ -31,16 +31,13 @@ TRANSFER = ("SELECT input.txid, input.wallet as wallet_in, output.wallet as wall
             "INNER JOIN txoutput as output ON input.txid = output.txid;"
             )
 
-# TODO: Add User ID
 WALLETS = ("SELECT DISTINCT walletid into wallets from (select distinct transfer.wallet_in as walletid from transfer union "
             " select distinct transfer.wallet_out as walletid from transfer) X;")
 
-PREP_WALLETS = ("CREATE TABLE wallets ("
-            "walletid char(64) primary key, "
-            "userid serial unique;")
-
 
 # Necessary at this point?
-USERS = ("")
+USERS = ("create table users ("
+         "uid varchar(20), "
+         "wallet varchar(34));")
 
 

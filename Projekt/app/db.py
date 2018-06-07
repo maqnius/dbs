@@ -24,15 +24,20 @@ def _create_tables():
     """
 
     cur = db.cursor()
-    print('Createing table transfer..')
+    print('Creating table transfer..')
     cur.execute(models.TRANSFER)
     db.commit()
 
-    print('Creating table wallets')
+    print('Creating table wallets..')
     cur.execute(models.WALLETS)
     db.commit()
-    # cur.execute(models.TXS)
-    # cur.execute(models.USERS)
+
+    print('Creating table transactions...')
+    cur.execute(models.TXS)
+
+    print('Creating table users...')
+    cur.execute(models.USERS)
+    db.commit()
 
     cur.close()
 
@@ -102,7 +107,7 @@ if __name__ == '__main__':
         _drop_tables(["txinput", "txoutput", "txblocks"])
         _create_temporary_tables()
 
-    _drop_tables(['txs', 'transfer', 'wallets', 'users'])
+    _drop_tables(['transactions', 'transfer', 'wallets', 'users'])
     _create_tables()
     db.close()
 
