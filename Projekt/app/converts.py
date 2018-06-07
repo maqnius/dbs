@@ -156,7 +156,7 @@ def _parse_row(row, convert, fill_missing, use_cols):
 CONF_TXBLOCKS = {
     'path': _get_file('transactions_blocks.csv'),
     'table': 'txblocks',
-    'col_names': ['txid', 'blockid', 'timestamp'],
+    'col_names': ['txid', 'blockid', 'timest'],
     'use_cols': (0, 1, 6),
     'skip_rows': 1,
     'convert': {
@@ -168,7 +168,7 @@ CONF_TXBLOCKS = {
 CONF_TXINPUT = {
     'path': _get_file('transactions_input.csv'),
     'table': 'txinput',
-    'col_names': ['txid', 'wallet', 'timestamp'],
+    'col_names': ['txid', 'wallet', 'timest'],
     'use_cols': (0, 3, 4),
     'skip_rows': 1,
     'convert': {
@@ -180,7 +180,7 @@ CONF_TXINPUT = {
 CONF_TXOUTPUT = {
     'path': _get_file('transactions_output.csv'),
     'table': 'txoutput',
-    'col_names': ['txid', 'satoshis', 'wallet', 'timestamp'],
+    'col_names': ['txid', 'satoshis', 'wallet', 'timest'],
     'use_cols': (0, 1, 3, 4),
     'skip_rows': 1,
     'convert': {

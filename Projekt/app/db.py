@@ -24,13 +24,17 @@ def _create_tables():
     """
 
     cur = db.cursor()
-    # cur.execute(models.TXS)
+    print('Createing table transfer..')
     cur.execute(models.TRANSFER)
-    # cur.execute(models.WALLETS)
+    db.commit()
+
+    print('Creating table wallets')
+    cur.execute(models.WALLETS)
+    db.commit()
+    # cur.execute(models.TXS)
     # cur.execute(models.USERS)
 
     cur.close()
-    db.commit()
 
 
 def _create_temporary_tables():
