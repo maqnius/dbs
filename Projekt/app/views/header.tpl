@@ -32,3 +32,4 @@ Header Template with navigation bar
     </section>
 </header>
 <div id="main" class="container">
+<div class="loading loading-lg"></div>

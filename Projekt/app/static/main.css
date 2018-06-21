@@ -2,11 +2,12 @@ body {
     margin: 0;
 }
 
-div#out {
+div#out, div.loading {
     position: absolute;
     width: 90%;
-    height: 90%;
+    height: 50%;
 }
+
 
 header.navbar {
     margin-bottom: 10px;
