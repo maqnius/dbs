@@ -4,32 +4,32 @@ import csv
 from psycopg2 import IntegrityError, errorcodes
 from datetime import datetime
 import time
-from exceptions import ParseException
+from exceptions import ParseException, reset_errs, ERRS
 
 
 def convert_basestring(base_string):
     if 27 <= len(base_string) <= 34:
         return base_string
     else:
-        raise ParseException("Address is not between 27 and 34 characters long", 1)
+        raise ParseException(1)
 
 
 def convert_timestamp(timestamp):
     if int(timestamp) > time.time():
         timestamp = timestamp[:-3]
+        ERRS[str(2)] += 1
 
     try:
         date = datetime.utcfromtimestamp(int(timestamp))
     except ValueError:
-        raise ParseException("Time is in future.", 2)
+        raise ParseException(2)
 
     return date.isoformat(sep=' ')
 
 
 def convert_sha256(input):
     if len(input) != 64:
-        print("ouch")
-        raise ParseException('No valid hash', 3)
+        raise ParseException(3)
     else:
         return input
 
@@ -56,7 +56,7 @@ def _get_file(name):
     return os.path.join(DATA, name)
 
 
-def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={}, fill_missing={}):
+def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={}, fill_missing={}, autocommit=False):
     """
     Fills table using a csv input file
 
@@ -79,6 +79,8 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
         Dictionary of missing values for given columns
 
     """
+    reset_errs()
+
     cur = db.cursor()
 
     execute_string = "INSERT INTO {} ({}) VALUES ({})".format(
@@ -87,8 +89,8 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
         ','.join(['%s']*len(col_names))
     )
 
-    errors = [0, 0, 0, 0, 0]
     written = 0
+
     with open(path, newline='') as file:
         reader = csv.reader(file, delimiter=',')
         for row_ix, row in enumerate(reader):
@@ -105,7 +107,7 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
                 written += 1
             except ParseException as e:
                 # Not all columns could be parsed
-                errors[e.code] += 1
+                ERRS[str(e.code)] += 1
             except IntegrityError as e:
                 if e.pgcode == errorcodes.UNIQUE_VIOLATION:
                     # Already entry in table
@@ -113,12 +115,16 @@ def fill_table(db, path, table, col_names, skip_rows=0, use_cols=(), convert={},
 
                     # Delete duplicate and continue
                     cur.execute("DELETE FROM txblocks WHERE txid = %s;", (row[0],))
-                    db.commit()
-                    errors[4] += 1
+                    if autocommit:
+                        db.commit()
+                    ERRS[str(4)] += 1
                 else:
                     raise
 
-    return errors, written
+    if not autocommit:
+        db.commit()
+
+    return ERRS, written
 
 
 def _parse_row(row, convert, fill_missing, use_cols):
@@ -141,14 +147,14 @@ def _parse_row(row, convert, fill_missing, use_cols):
                         # No converter defined
                         entries.append(column)
                 else:
-                    raise ParseException("Column {} is empty.".format(ix), 0)
+                    raise ParseException(0)
 
             except ParseException as e:
                 if str(ix) in fill_missing:
                     # Fill if for this column there is a fill value given
                     entries += fill_missing[str(ix)]
                 else:
-                    raise e
+                    raise
 
     return entries
 
@@ -160,8 +166,11 @@ CONF_TXBLOCKS = {
     'use_cols': (0, 1, 6),
     'skip_rows': 1,
     'convert': {
+        '0': convert_sha256,
+        '1': convert_sha256,
         '6': convert_timestamp
-    }
+    },
+    'autocommit': True
 }
 
 
@@ -172,6 +181,8 @@ CONF_TXINPUT = {
     'use_cols': (0, 3, 4),
     'skip_rows': 1,
     'convert': {
+        '0': convert_sha256,
+        '3': convert_basestring,
         '4': convert_timestamp
     }
 }
@@ -184,6 +195,8 @@ CONF_TXOUTPUT = {
     'use_cols': (0, 1, 3, 4),
     'skip_rows': 1,
     'convert': {
+        '0': convert_sha256,
+        '3': convert_basestring,
         '4': convert_timestamp
     }
 }

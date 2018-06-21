@@ -34,6 +34,7 @@ def _create_tables():
 
     print('Creating table transactions...')
     cur.execute(models.TXS)
+    db.commit()
 
     print('Creating table users...')
     cur.execute(models.USERS)
