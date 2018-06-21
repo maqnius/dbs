@@ -23,4 +23,3 @@ TXBLOCKS = ("CREATE TABLE txblocks ("
 WALLETS = ("SELECT DISTINCT walletid into wallets from (select txoutput.wallet as walletid from txoutput union"
             " select txinput.wallet as walletid from txinput) X; "
            "alter TABLE wallets add constraint pk primary key (walletid);")
-

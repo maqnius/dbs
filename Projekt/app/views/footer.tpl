@@ -1,4 +1,4 @@
-</section>
+</div>
 <script>
     fetch('{{api_url}}')
         .then(function(response) {
