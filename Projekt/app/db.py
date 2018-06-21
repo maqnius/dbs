@@ -22,22 +22,10 @@ def _create_tables():
     Will create the actual relations from our temporary tables
 
     """
-
     cur = db.cursor()
-    print('Creating table transfer..')
-    cur.execute(models.TRANSFER)
-    db.commit()
 
     print('Creating table wallets..')
     cur.execute(models.WALLETS)
-    db.commit()
-
-    print('Creating table transactions...')
-    cur.execute(models.TXS)
-    db.commit()
-
-    print('Creating table users...')
-    cur.execute(models.USERS)
     db.commit()
 
     cur.close()

@@ -20,24 +20,7 @@ TXBLOCKS = ("CREATE TABLE txblocks ("
             "timest timestamp "
             ");")
 
-
-# Final Models
-TXS = ("SELECT txid, blockid, timest into transactions from txblocks where txid in (select distinct txid from transfer);")
-
-
-TRANSFER = ("SELECT input.txid, input.wallet as wallet_in, output.wallet as wallet_out, output.satoshis, output.timest "
-            "INTO transfer "
-            "FROM txinput as input "
-            "INNER JOIN txoutput as output ON input.txid = output.txid;"
-            )
-
-WALLETS = ("SELECT DISTINCT walletid into wallets from (select distinct transfer.wallet_in as walletid from transfer union "
-            " select distinct transfer.wallet_out as walletid from transfer) X;")
-
-
-# Necessary at this point?
-USERS = ("create table users ("
-         "uid varchar(20), "
-         "wallet varchar(34) primary key );")
-
+WALLETS = ("SELECT DISTINCT walletid into wallets from (select txoutput.wallet as walletid from txoutput union"
+            " select txinput.wallet as walletid from txinput) X; "
+           "alter TABLE wallets add constraint pk primary key (walletid);")
 
