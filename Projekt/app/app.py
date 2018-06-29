@@ -57,7 +57,7 @@ def main_route(path):
 SITES = {
     'print': {
         'title': 'Print Data',
-        'data': db.distribution
+        'data': db.test_graph
     },
     'graph': {
         'title': 'Network Graph',

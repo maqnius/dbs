@@ -1,9 +1,19 @@
-% include('header', **config)
+% include('header', **config, scripts = ["https://cdn.plot.ly/plotly-latest.min.js"])
 <div id="out">
 </div>
 <script>
     let processData = function (data) {
-        $('#out').html(JSON.stringify(data));
+        data.type = 'bar'
+
+        let fig = {
+          'data': [data],
+          'layout': {
+            xaxis: {title: 'Satoshis'},
+            yaxis: {title: 'Absolute Häufigkeit'}
+          }
+        }
+
+        Plotly.newPlot('out', fig)
     }
 </script>
 % include('footer', **config)

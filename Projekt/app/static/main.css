@@ -2,7 +2,7 @@ body {
     margin: 0;
 }
 
-div#out, div.loading {
+div.loading {
     position: absolute;
     width: 90%;
     height: 50%;

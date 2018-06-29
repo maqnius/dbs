@@ -1,7 +1,9 @@
+import numpy
+import sys
 import psycopg2
 from psycopg2.sql import SQL, Identifier
-import sys
 from appconfig import config
+
 import models
 import converts
 from exceptions import error_stat
@@ -18,16 +20,54 @@ db = psycopg2.connect(**config['database'])
 
 @cached
 def distribution():
-    return {"hi": "hi"}
+    cur = db.cursor()
+
+    # Get sum of received satoshis grouped by wallet id
+    query = """
+    SELECT wallet, SUM(satoshis)
+    from txoutput, wallets
+    where wallet = walletid group by wallet order by SUM(satoshis) DESC;
+    """
+
+    cur.execute(query)
+    result = cur.fetchall()
+
+    # Convert result to numpy array
+    result = numpy.array([res[1] for res in result], dtype=numpy.int64)
+
+    # Calculate histogram
+    hist, edges = numpy.histogram(result, normed=False)
+    print(hist)
+    # Define
+    data = {
+        'x': ["{}-{}".format(numpy.format_float_scientific(edges[i]), numpy.format_float_scientific(edges[i + 1]))
+              for i in range(len(edges) - 1)],
+        'y': hist.tolist()
+    }
+
+    return data
+
+
+@cached
+def get_range():
+    """
+    Get min max
+
+    Returns
+    -------
+
+    """
+    cur = db.cursor()
+
+    # Get max and min amount of transaction
+    cur.execute("SELECT MAX(satoshis), MIN(satoshis) FROM txoutput where satoshis > 0;")
+
+    return cur.fetchone()
 
 
 @cached
 def get_all():
     cur = db.cursor()
-
-    # Get max and min amount of transaction
-    cur.execute("SELECT MAX(satoshis), MIN(satoshis) FROM txoutput where satoshis > 0;")
-    max_sat, min_sat = cur.fetchone()
 
     # Get all transactions
     query = """
@@ -39,19 +79,8 @@ def get_all():
     o.wallet in (select w.walletid from wallets as w) AND
     i.wallet in (select w.walletid from wallets as w);
     """
-    # cur.execute(query)
-    # print(cur.rowcount)
-
-    query = """
-    SELECT wallet, SUM(satoshis)
-    from txoutput, wallets
-    where wallet = walletid group by wallet;
-    """
-
     cur.execute(query)
     print(cur.rowcount)
-    print(cur.fetchmany(20))
-
     return {}
 
 
