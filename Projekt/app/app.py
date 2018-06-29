@@ -49,7 +49,7 @@ def main_route(path):
             'title': SITES[path]['title'],
             'menu': SITES
         }
-        return template(path, config=config)
+        return template(os.path.join('custom/', path), config=config)
     except (OSError, KeyError):
         abort(404)
 
