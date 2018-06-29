@@ -17,35 +17,71 @@ This is where the magic happens!
 # Connect to database
 db = psycopg2.connect(**config['database'])
 
+MINNECC = 0
+
 
 @cached
 def distribution():
+    global MINNECC
+
     cur = db.cursor()
 
     # Get sum of received satoshis grouped by wallet id
     query = """
-    SELECT wallet, SUM(satoshis)
-    from txoutput, wallets
-    where wallet = walletid group by wallet order by SUM(satoshis) DESC;
+    SELECT o.satoshis
+    from txoutput as o, txinput as i, wallets as w
+    where o.wallet = w.walletid
+     and o.txid = i.txid
+     and o.wallet <> i.wallet
+     order by satoshis DESC;
     """
 
     cur.execute(query)
     result = cur.fetchall()
 
     # Convert result to numpy array
-    result = numpy.array([res[1] for res in result], dtype=numpy.int64)
+    satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
 
     # Calculate histogram
-    hist, edges = numpy.histogram(result, normed=False)
-    print(hist)
+    hist, edges = numpy.histogram(satoshis, bins=10, normed=True)
+
     # Define
     data = {
-        'x': ["{}-{}".format(numpy.format_float_scientific(edges[i]), numpy.format_float_scientific(edges[i + 1]))
+        'x': ["{}-{}".format(numpy.format_float_scientific(edges[i], precision=6),
+                             numpy.format_float_scientific(edges[i + 1], precision=6))
               for i in range(len(edges) - 1)],
         'y': hist.tolist()
     }
 
+    MINNECC = int(_calc_useful_data(satoshis))
+
     return data
+
+
+def _calc_useful_data(result, vol=0.90):
+    """
+    Sum up n biggest amounts of transactions until volume is at least
+    90 % of the maximum
+
+    Parameters
+    ----------
+    result
+    vol
+
+    Returns
+    -------
+
+    """
+    total = result.sum()
+
+    acc = 0
+    for i, res in enumerate(result):
+        acc += res
+        if acc / total > vol:
+            print('Lower bound for satoshi transaction of {} is enough to have {} % of transaction vol. '
+                  'Use of {} % of items ({}).'
+                  .format(res, int(vol*100), int(i/len(result)*100), i))
+            return res
 
 
 @cached
@@ -75,11 +111,11 @@ def get_all():
     FROM txinput as i, txoutput as o
     WHERE i.txid = o.txid AND
     i.wallet <> o.wallet AND
-    o.satoshis > 0 AND 
+    o.satoshis > %s AND 
     o.wallet in (select w.walletid from wallets as w) AND
     i.wallet in (select w.walletid from wallets as w);
     """
-    cur.execute(query)
+    cur.execute(query, (MINNECC,))
     print(cur.rowcount)
     return {}
 

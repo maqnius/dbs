@@ -9,7 +9,7 @@
           'data': [data],
           'layout': {
             xaxis: {title: 'Satoshis'},
-            yaxis: {title: 'Absolute Häufigkeit'}
+            yaxis: {title: 'Relative Häufigkeit'}
           }
         }
 
