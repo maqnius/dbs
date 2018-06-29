@@ -28,3 +28,17 @@ def get_uniqe_name():
     _used.add(name)
 
     return name
+
+
+CACHE = {}
+
+
+def cached(func):
+    def data(*args, **kwargs):
+        try:
+            return CACHE[func.__name__]
+        except KeyError:
+            CACHE[func.__name__] = func(*args, **kwargs)
+            return CACHE[func.__name__]
+
+    return data

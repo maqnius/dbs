@@ -26,8 +26,8 @@ Header Template with navigation bar
 <body>
 <header class="navbar bg-gray">
     <section class="navbar-section">
-        % for url, name in menu.items():
-            <a class="btn {{"btn-primary" if url==cur_url else "btn-link"}}"  href="{{url}}">{{name}}</a>
+        % for url, content in menu.items():
+            <a class="btn {{"btn-primary" if url==cur_url else "btn-link"}}"  href="{{url}}">{{content['title']}}</a>
         % end
     </section>
 </header>

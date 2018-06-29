@@ -5,16 +5,88 @@ from appconfig import config
 import models
 import converts
 from exceptions import error_stat
-from helpsers import get_uniqe_name
+from helpsers import cached
 
 """
 This is where the magic happens!
 
 """
 
-
 # Connect to database
 db = psycopg2.connect(**config['database'])
+
+
+@cached
+def distribution():
+    return {"hi": "hi"}
+
+
+@cached
+def get_all():
+    cur = db.cursor()
+
+    # Get max and min amount of transaction
+    cur.execute("SELECT MAX(satoshis), MIN(satoshis) FROM txoutput where satoshis > 0;")
+    max_sat, min_sat = cur.fetchone()
+
+    # Get all transactions
+    query = """
+    SELECT i.wallet, o.wallet, o.satoshis 
+    FROM txinput as i, txoutput as o
+    WHERE i.txid = o.txid AND
+    i.wallet <> o.wallet AND
+    o.satoshis > 0 AND 
+    o.wallet in (select w.walletid from wallets as w) AND
+    i.wallet in (select w.walletid from wallets as w);
+    """
+    # cur.execute(query)
+    # print(cur.rowcount)
+
+    query = """
+    SELECT wallet, SUM(satoshis)
+    from txoutput, wallets
+    where wallet = walletid group by wallet;
+    """
+
+    cur.execute(query)
+    print(cur.rowcount)
+    print(cur.fetchmany(20))
+
+    return {}
+
+
+@cached
+def test_graph():
+    return {
+        "nodes": [
+            {
+                "id": "n0",
+            },
+            {
+                "id": "n1",
+            },
+            {
+                "id": "n2",
+            }
+        ],
+        "edges": [
+            {
+                "id": "e0",
+                "source": "n0",
+                "target": "n1"
+            },
+            {
+                "id": "e1",
+                "source": "n1",
+                "target": "n2"
+            },
+            {
+                "id": "e2",
+                "source": "n2",
+                "target": "n0"
+            }
+        ]
+    }
 
 
 def _create_tables():
@@ -43,7 +115,7 @@ def _create_temporary_tables():
     # For transaction_input.csv
     cur.execute(models.TXINPUT)
     db.commit()
-    
+
     print("Filling txinput table...")
     errors, written = converts.fill_table(db, **converts.CONF_TXINPUT)
     print("Wrote {} entries into the database:".format(written))
@@ -99,4 +171,3 @@ if __name__ == '__main__':
     _drop_tables(['transactions', 'transfer', 'wallets', 'users'])
     _create_tables()
     db.close()
-
