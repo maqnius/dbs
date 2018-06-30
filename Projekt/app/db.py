@@ -21,29 +21,45 @@ MINNECC = 0
 
 
 @cached
-def distribution():
-    global MINNECC
+def get_unique_transactions():
+    """
+    Queries all transaction, excluding the change
 
+    Returns
+    -------
+    result: array of tuples
+
+    """
     cur = db.cursor()
 
-    # Get sum of received satoshis grouped by wallet id
     query = """
-    SELECT o.satoshis
-    from txoutput as o, txinput as i, wallets as w
-    where o.wallet = w.walletid
-     and o.txid = i.txid
-     and o.wallet <> i.wallet
-     order by satoshis DESC;
+        SELECT satoshis, wallet
+        from txoutput
+        where satoshis not in (
+            select o.satoshis
+            from txinput i
+            inner join txoutput o
+            on (i.txid = o.txid and i.wallet = o.wallet)
+        ) order by satoshis desc;
     """
 
     cur.execute(query)
-    result = cur.fetchall()
+
+    return cur.fetchall()
+
+
+@cached
+def distribution():
+    global MINNECC
+
+    result = get_unique_transactions()
 
     # Convert result to numpy array
     satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
 
+    print(satoshis[:5])
     # Calculate histogram
-    hist, edges = numpy.histogram(satoshis, bins=10, normed=True)
+    hist, edges = numpy.histogram(satoshis, bins=10, normed=False)
 
     # Define
     data = {
@@ -80,7 +96,7 @@ def _calc_useful_data(result, vol=0.90):
         if acc / total > vol:
             print('Lower bound for satoshi transaction of {} is enough to have {} % of transaction vol. '
                   'Use of {} % of items ({}).'
-                  .format(res, int(vol*100), int(i/len(result)*100), i))
+                  .format(res, int(vol * 100), int(i / len(result) * 100), i))
             return res
 
 
@@ -103,20 +119,6 @@ def get_range():
 
 @cached
 def get_all():
-    cur = db.cursor()
-
-    # Get all transactions
-    query = """
-    SELECT i.wallet, o.wallet, o.satoshis 
-    FROM txinput as i, txoutput as o
-    WHERE i.txid = o.txid AND
-    i.wallet <> o.wallet AND
-    o.satoshis > %s AND 
-    o.wallet in (select w.walletid from wallets as w) AND
-    i.wallet in (select w.walletid from wallets as w);
-    """
-    cur.execute(query, (MINNECC,))
-    print(cur.rowcount)
     return {}
 
 
