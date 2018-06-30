@@ -8,7 +8,7 @@
         let fig = {
           'data': [data],
           'layout': {
-            xaxis: {title: 'Satoshis'},
+            xaxis: {title: 'Anzahl an eingehenden Transanktionen per Wallet'},
             yaxis: {title: 'Absolute Häufigkeit'}
           }
         }

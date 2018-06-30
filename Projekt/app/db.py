@@ -20,8 +20,7 @@ db = psycopg2.connect(**config['database'])
 MINNECC = 0
 
 
-@cached
-def get_unique_transactions():
+def get_unique_transactions(lower_bound=0):
     """
     Queries all transaction, excluding the change
 
@@ -40,16 +39,90 @@ def get_unique_transactions():
             from txinput i
             inner join txoutput o
             on (i.txid = o.txid and i.wallet = o.wallet)
-        ) order by satoshis desc;
+        ) and satoshis > %s order by satoshis desc;
     """
 
-    cur.execute(query)
+    cur.execute(query, (lower_bound,))
 
     return cur.fetchall()
 
 
 @cached
-def distribution():
+def wallet_distribution():
+    cur = db.cursor()
+
+    query = """
+        SELECT sum(satoshis), wallet
+        from txoutput
+        where satoshis not in (
+            select o.satoshis
+            from txinput i
+            inner join txoutput o
+            on (i.txid = o.txid and i.wallet = o.wallet)
+        ) group by wallet order by sum(satoshis) desc;
+    """
+
+    cur.execute(query)
+
+    result = cur.fetchall()
+
+    # Convert result to numpy array
+    satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
+
+    # Calculate histogram
+    hist, edges = numpy.histogram(satoshis, normed=False)
+
+    # Define
+
+    data = {
+        'x': ["{}-{}".format(numpy.format_float_scientific(edges[i], precision=6),
+                             numpy.format_float_scientific(edges[i + 1], precision=6))
+              for i in range(len(edges) - 1)],
+        'y': hist.tolist()
+    }
+
+    return data
+
+
+@cached
+def no_trans_distribution():
+    cur = db.cursor()
+
+    query = """
+        SELECT count(satoshis), wallet
+        from txoutput
+        where satoshis not in (
+            select o.satoshis
+            from txinput i
+            inner join txoutput o
+            on (i.txid = o.txid and i.wallet = o.wallet)
+        ) group by wallet;
+    """
+
+    cur.execute(query)
+
+    result = cur.fetchall()
+
+    # Convert result to numpy array
+    satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
+
+    # Calculate histogram
+    hist, edges = numpy.histogram(satoshis, normed=False)
+
+    # Define
+
+    data = {
+        'x': ["{}-{}".format(int(edges[i]),
+                             int(edges[i + 1]))
+              for i in range(len(edges) - 1)],
+        'y': hist.tolist()
+    }
+
+    return data
+
+
+@cached
+def trans_distribution():
     global MINNECC
 
     result = get_unique_transactions()
@@ -57,7 +130,6 @@ def distribution():
     # Convert result to numpy array
     satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
 
-    print(satoshis[:5])
     # Calculate histogram
     hist, edges = numpy.histogram(satoshis, bins=10, normed=False)
 
