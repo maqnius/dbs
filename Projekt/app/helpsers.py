@@ -34,6 +34,8 @@ CACHE = {}
 
 
 def cached(func):
+    global CACHE
+
     def data(*args, **kwargs):
         try:
             return CACHE[func.__name__]
