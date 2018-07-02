@@ -1,136 +1,18 @@
-import numpy
+import sys
+
+import numpy as np
+import pandas as pd
+from scipy import stats, integrate
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(color_codes=True)
+
 from psycopg2.extras import execute_values
-from helpsers import cached
 from db import db
 
-MINNECC = 0
 
-
-def get_unique_transactions(lower_bound=0):
-    """
-    Queries all transaction, excluding the change
-
-    Returns
-    -------
-    result: array of tuples
-
-    """
-    cur = db.cursor()
-
-    query = """
-        SELECT sum(satoshis), wallet
-        from txoutput
-        where satoshis not in (
-            select o.satoshis
-            from txinput i
-            inner join txoutput o
-            on (i.txid = o.txid and i.wallet = o.wallet)
-        ) and satoshis > %s group by wallet order by satoshis desc;
-    """
-
-    cur.execute(query, (lower_bound,))
-
-    return cur.fetchall()
-
-
-def wallet_distribution():
-    cur = db.cursor()
-
-    query = """
-        SELECT sum(satoshis), wallet
-        from txoutput
-        where satoshis not in (
-            select o.satoshis
-            from txinput i
-            inner join txoutput o
-            on (i.txid = o.txid and i.wallet = o.wallet)
-        ) group by wallet order by sum(satoshis) desc;
-    """
-
-    cur.execute(query)
-
-    result = cur.fetchall()
-
-    # Convert result to numpy array
-    satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
-
-    # Calculate histogram
-    hist, edges = numpy.histogram(satoshis, normed=False)
-
-    # Define
-
-    data = {
-        'x': ["{}-{}".format(numpy.format_float_scientific(edges[i], precision=6),
-                             numpy.format_float_scientific(edges[i + 1], precision=6))
-              for i in range(len(edges) - 1)],
-        'y': hist.tolist()
-    }
-
-    return data
-
-
-def no_trans_distribution():
-    cur = db.cursor()
-
-    query = """
-        SELECT count(satoshis), wallet
-        from txoutput
-        where satoshis not in (
-            select o.satoshis
-            from txinput i
-            inner join txoutput o
-            on (i.txid = o.txid and i.wallet = o.wallet)
-        ) group by wallet;
-    """
-
-    cur.execute(query)
-
-    result = cur.fetchall()
-
-    # Convert result to numpy array
-    satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
-
-    # Calculate histogram
-    hist, edges = numpy.histogram(satoshis, normed=False)
-
-    # Define
-
-    data = {
-        'x': ["{}-{}".format(int(edges[i]),
-                             int(edges[i + 1]))
-              for i in range(len(edges) - 1)],
-        'y': hist.tolist()
-    }
-
-    return data
-
-
-@cached
-def trans_distribution():
-    global MINNECC
-
-    result = get_unique_transactions()
-
-    # Convert result to numpy array
-    satoshis = numpy.array([res[0] for res in result], dtype=numpy.int64)
-
-    # Calculate histogram
-    hist, edges = numpy.histogram(satoshis, bins=10, normed=False)
-
-    # Define
-    data = {
-        'x': ["{}-{}".format(numpy.format_float_scientific(edges[i], precision=6),
-                             numpy.format_float_scientific(edges[i + 1], precision=6))
-              for i in range(len(edges) - 1)],
-        'y': hist.tolist()
-    }
-
-    MINNECC = int(_calc_useful_data(satoshis))
-
-    return data
-
-
-def _calc_useful_data(result, vol=0.90):
+def calc_lower_bound(result, vol=0.90):
     """
     Sum up n biggest amounts of transactions until volume is at least
     90 % of the maximum
@@ -146,6 +28,9 @@ def _calc_useful_data(result, vol=0.90):
     """
     total = result.sum()
 
+    # Descending sort
+    result[::-1].sort()
+
     acc = 0
     for i, res in enumerate(result):
         acc += res
@@ -154,22 +39,6 @@ def _calc_useful_data(result, vol=0.90):
                   'Use of {} % of items ({}).'
                   .format(res, int(vol * 100), int(i / len(result) * 100), i))
             return res
-
-
-def get_range():
-    """
-    Get min max
-
-    Returns
-    -------
-
-    """
-    cur = db.cursor()
-
-    # Get max and min amount of transaction
-    cur.execute("SELECT MAX(satoshis), MIN(satoshis) FROM txoutput where satoshis > 0;")
-
-    return cur.fetchone()
 
 
 def cluster_users():
@@ -259,6 +128,94 @@ def create_user_table(wallet_userid):
     cur.close()
 
 
+def get_user_incomes():
+    """
+    Calculates sum of incoming money to users (wallets according to users table).
+
+    Returns
+    -------
+
+    """
+    cur = db.cursor()
+
+    query = """
+    select sum(t.satoshis) as sat, u.userid
+    from  (
+        select sum(ohne.satoshis) as satoshis, ohne.wallet as wallet
+        from (
+            select satoshis, wallet
+            from txoutput
+            except 
+            select o.satoshis, o.wallet
+            from txoutput o, txinput i
+            where (o.txid = i.txid and o.wallet = i.wallet)
+        ) ohne group by wallet
+    ) t, users u
+    where t.wallet = u.wallet
+    group by u.userid order by sat desc;
+    """
+
+    cur.execute(query)
+    res = cur.fetchall()
+    cur.close()
+
+    # Convert to numpy array
+    satoshis = np.array([row[0] for row in res], dtype=np.int64)
+
+    return satoshis
+
+
+def get_transactions():
+    """
+    Fetches transactions between users.
+
+    Returns
+    -------
+    res: array of tuples
+        Query result. It cointains
+            userid (from)
+            userid (to)
+            satoshis transferred
+            timestamp
+            transaction_id
+    """
+    cur = db.cursor()
+
+    query = """
+    select distinct u.userid, outputs.userid, outputs.satoshis, outputs.timest, outputs.txid
+    from (
+            select u.userid as userid, ohne.txid as txid, ohne.satoshis as satoshis, ohne.timest as timest 
+            from (
+                select *
+                from txoutput
+                except 
+                select o.*
+                from txoutput o, txinput i
+                where (o.txid = i.txid and o.wallet = i.wallet)
+            ) ohne, users u 
+            where u.wallet = ohne.wallet
+        ) outputs, txinput i, users u
+    where i.txid = outputs.txid and i.wallet = u.wallet;
+    """
+
+    cur.execute(query)
+    res = cur.fetchall()
+    cur.close()
+
+    return res
+
+
 if __name__ == '__main__':
-    wallet_u, no_names = cluster_users()
-    create_user_table(wallet_u)
+    if '--create-users' in sys.argv:
+        wallet_u, no_names = cluster_users()
+        create_user_table(wallet_u)
+
+    # Distribution of incomes of users
+    sat = get_user_incomes()
+    calc_lower_bound(sat, 0.90)
+    sns.distplot(sat, kde=False)
+    plt.show()
+
+    # Transactions between users
+    transactions = get_transactions()
+    calc_lower_bound(np.array([res[2] for res in transactions], dtype=np.int64))

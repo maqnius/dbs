@@ -7,6 +7,7 @@ name = "pypi"
 numpy = "*"
 "psycopg2-binary" = "*"
 gevent = "*"
+seaborn = "*"
 
 [dev-packages]
 
