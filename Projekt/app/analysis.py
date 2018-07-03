@@ -197,7 +197,7 @@ def get_transactions():
             ) ohne, users u 
             where u.wallet = ohne.wallet
         ) outputs, txinput i, users u
-    where i.txid = outputs.txid and i.wallet = u.wallet;
+    where i.txid = outputs.txid and i.wallet = u.wallet and u.userid <> outputs.userid;
     """
 
     cur.execute(query)
