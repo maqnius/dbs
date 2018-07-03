@@ -212,10 +212,14 @@ if __name__ == '__main__':
 
     # Distribution of incomes of users
     sat = get_user_incomes()
+    
+    # Lowerbound on user incomes
     calc_lower_bound(sat, 0.90)
+    
     sns.distplot(sat, kde=False)
     plt.show()
 
     # Transactions between users
     transactions = get_transactions()
+    # Lower bound on user transactions
     calc_lower_bound(np.array([res[2] for res in transactions], dtype=np.int64))
