@@ -36,7 +36,8 @@ def create_graph(nodes, transactions):
         try:
             edges.append((node_map[row[0]], node_map[row[1]], row[2]))
         except KeyError as e:
-            print('Node der Transaktion nicht im Graphen: ', e.args)
+            # Node der Transaktion nicht im Graphen gefunden
+            pass
 
     g.add_edge_list(edges, eprops=(edge_weight,))
 
