@@ -1,33 +1,29 @@
 import numpy as np
 from graph_tool.all import *
 
-g = Graph()
-v1 = g.add_vertex()
-v2 = g.add_vertex()
-e = g.add_edge(v1, v2)
-graph_draw(g, vertex_text=g.vertex_index, vertex_font_size=18, output_size=(200, 200), output="two-nodes.png")
-
 
 def create_graph(nodes, transactions):
     g = Graph()
+    node_map = {}  # mapping wallet ids to node ids
 
     # Add vertices with weights
     vertex_weight = g.new_vertex_property('int64_t', val=-1)
     vertex_size = g.new_vertex_property('double', val=0)
 
-    size_func = calc_sizes(list(nodes.values()))
+    size_func = calc_sizes([_[0] for _ in nodes])
 
     g.vp.vweight = vertex_weight  # Make property internal
     g.vp.vsize = vertex_size
 
-    max_id = max([int(row) for row in nodes.keys()])
+    g.add_vertex(len(nodes))
 
-    g.add_vertex(max_id + 1)
-
+    # Add weights and sizes to vertices
     for v in g.vertices():
+        index = g.vertex_index[v]
         try:
-            vertex_weight[v] = nodes[int(v)]
-            vertex_size[v] = size_func(nodes[int(v)])
+            vertex_weight[v] = nodes[index][0]
+            vertex_size[v] = size_func(vertex_weight[index])
+            node_map[nodes[index][1]] = index
         except KeyError:
             pass
 
@@ -35,7 +31,13 @@ def create_graph(nodes, transactions):
     edge_weight = g.new_edge_property('int64_t', val=-1)
     g.ep.eweight = edge_weight  # Make property internal
 
-    edges = [row[:3] for row in transactions]
+    edges = []
+    for row in transactions:
+        try:
+            edges.append((node_map[row[0]], node_map[row[1]], row[2]))
+        except KeyError as e:
+            print('Node der Transaktion nicht im Graphen: ', e.args)
+
     g.add_edge_list(edges, eprops=(edge_weight,))
 
     return g
