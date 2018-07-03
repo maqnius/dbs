@@ -10,6 +10,7 @@ sns.set(color_codes=True)
 
 from psycopg2.extras import execute_values
 from db import db
+from graph import *
 
 
 def calc_lower_bound(result, vol=0.90):
@@ -159,10 +160,11 @@ def get_user_incomes():
     res = cur.fetchall()
     cur.close()
 
-    # Convert to numpy array
-    satoshis = np.array([row[0] for row in res], dtype=np.int64)
+    income = {}
+    for row in res:
+        income[int(row[1])] = int(row[0])
 
-    return satoshis
+    return income
 
 
 def get_transactions():
@@ -205,21 +207,69 @@ def get_transactions():
     return res
 
 
+def get_users():
+    cur = db.cursor()
+    cur.execute("""
+    select distinct userid
+    from users;
+    """)
+
+    res = cur.fetchall()
+    cur.close()
+
+    return [int(r[0]) for r in res]
+
+
 if __name__ == '__main__':
     if '--create-users' in sys.argv:
         wallet_u, no_names = cluster_users()
         create_user_table(wallet_u)
 
     # Distribution of incomes of users
-    sat = get_user_incomes()
-    
-    # Lowerbound on user incomes
-    calc_lower_bound(sat, 0.90)
-    
-    sns.distplot(sat, kde=False)
-    plt.show()
+    print('Calculting total user incomes..')
+    incomes = get_user_incomes()
 
     # Transactions between users
+    print('Getting transactions between users..')
     transactions = get_transactions()
+
+    print('Creating graph..')
+    g = create_graph(incomes, transactions)
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+    sat = np.array(list(incomes.values()))
+
+    # Lowerbound on user incomes
+    # calc_lower_bound(sat, 0.95)
+    # calc_lower_bound(sat, 0.90)
+    # calc_lower_bound(sat, 0.85)
+    limit = calc_lower_bound(sat, 0.30)
+    add_lower_income_limit(g, limit)
+
+    print('Filterint Nodes')
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+    print('Plotting graph..')
+    pos = sfdp_layout(g, vweight=g.vp.vweight)
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='user_filtered.png')
+
+    # sns.distplot(sat, kde=False)
+    # plt.show()
+
+    g.set_vertex_filter(None)
+
     # Lower bound on user transactions
-    calc_lower_bound(np.array([res[2] for res in transactions], dtype=np.int64))
+    transaction_volumes = np.array([res[2] for res in transactions], dtype=np.int64)
+    transaction_limit = calc_lower_bound(transaction_volumes, 0.30)
+
+    add_lower_transaction_limit(g, transaction_limit)
+
+    print('Filtering Transactions')
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+    print('Plotting graph..')
+    pos = sfdp_layout(g, vweight=g.vp.vweight)
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered.png')
