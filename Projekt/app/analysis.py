@@ -253,7 +253,8 @@ if __name__ == '__main__':
 
     print('Plotting graph..')
     pos = sfdp_layout(g, vweight=g.vp.vweight)
-    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='user_filtered.png')
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='user_filtered_weights.png')
+    graph_draw(g, vertex_size=g.vp.vsize, output='user_filtered.png')
 
     # sns.distplot(sat, kde=False)
     # plt.show()
@@ -272,4 +273,5 @@ if __name__ == '__main__':
 
     print('Plotting graph..')
     pos = sfdp_layout(g, vweight=g.vp.vweight)
-    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered.png')
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered_weights.png')
+    graph_draw(g, vertex_size=g.vp.vsize, output='transactions_filtered.png')
