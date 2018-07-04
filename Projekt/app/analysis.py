@@ -268,7 +268,6 @@ def get_wallet_transactions():
     return res
 
 
-
 def get_users():
     cur = db.cursor()
     cur.execute("""
@@ -289,10 +288,12 @@ if __name__ == '__main__':
 
     # Distribution of incomes of users
     print('Calculting total user incomes..')
+    # incomes = get_wallet_incomes()
     incomes = get_user_incomes()
 
     # Transactions between users
     print('Getting transactions between users..')
+    # transactions = get_wallet_transactions()
     transactions = get_user_transactions()
 
     print('Creating graph..')
@@ -306,7 +307,7 @@ if __name__ == '__main__':
     # calc_lower_bound(sat, 0.95)
     # calc_lower_bound(sat, 0.90)
     # calc_lower_bound(sat, 0.85)
-    limit = calc_lower_bound(sat, 0.30)
+    limit = calc_lower_bound(sat, 0.40)
     add_lower_income_limit(g, limit)
 
     print('Filterint Nodes')
@@ -314,7 +315,7 @@ if __name__ == '__main__':
     print("Edges: ", g.num_edges())
 
     print('Plotting graph..')
-    pos = sfdp_layout(g, vweight=g.vp.vweight)
+    pos = sfdp_layout(g, vweight=g.vp.vweight, C=.2)
     graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='user_filtered_weights.png')
     graph_draw(g, vertex_size=g.vp.vsize, output='user_filtered.png')
 
@@ -325,7 +326,7 @@ if __name__ == '__main__':
 
     # Lower bound on user transactions
     transaction_volumes = np.array([res[2] for res in transactions], dtype=np.int64)
-    transaction_limit = calc_lower_bound(transaction_volumes, 0.30)
+    transaction_limit = calc_lower_bound(transaction_volumes, 0.40)
 
     add_lower_transaction_limit(g, transaction_limit)
 
@@ -334,6 +335,6 @@ if __name__ == '__main__':
     print("Edges: ", g.num_edges())
 
     print('Plotting graph..')
-    pos = sfdp_layout(g, vweight=g.vp.vweight)
-    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered_weights.png')
+    pos = sfdp_layout(g, vweight=g.vp.vweight, C=.2)
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered_weights_sfdp.png')
     graph_draw(g, vertex_size=g.vp.vsize, output='transactions_filtered.png')
