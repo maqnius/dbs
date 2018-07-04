@@ -10,6 +10,7 @@ sns.set(color_codes=True)
 
 from psycopg2.extras import execute_values
 from db import db
+from graph import *
 
 
 def calc_lower_bound(result, vol=0.90):
@@ -159,13 +160,39 @@ def get_user_incomes():
     res = cur.fetchall()
     cur.close()
 
-    # Convert to numpy array
-    satoshis = np.array([row[0] for row in res], dtype=np.int64)
-
-    return satoshis
+    return res
 
 
-def get_transactions():
+def get_wallet_incomes():
+    """
+    Calculates sum of incoming money to users (wallets according to users table).
+
+    Returns
+    -------
+
+    """
+    cur = db.cursor()
+
+    query = """
+        select sum(ohne.satoshis) as satoshis, ohne.wallet as wallet
+        from (
+            select satoshis, wallet
+            from txoutput
+            except 
+            select o.satoshis, o.wallet
+            from txoutput o, txinput i
+            where (o.txid = i.txid and o.wallet = i.wallet)
+        ) ohne group by wallet order by satoshis desc;
+    """
+
+    cur.execute(query)
+    res = cur.fetchall()
+    cur.close()
+
+    return res
+
+
+def get_user_transactions():
     """
     Fetches transactions between users.
 
@@ -195,7 +222,7 @@ def get_transactions():
             ) ohne, users u 
             where u.wallet = ohne.wallet
         ) outputs, txinput i, users u
-    where i.txid = outputs.txid and i.wallet = u.wallet;
+    where i.txid = outputs.txid and i.wallet = u.wallet and u.userid <> outputs.userid;
     """
 
     cur.execute(query)
@@ -205,17 +232,108 @@ def get_transactions():
     return res
 
 
+def get_wallet_transactions():
+    """
+    Fetches transactions between users.
+
+    Returns
+    -------
+    res: array of tuples
+        Query result. It cointains
+            userid (from)
+            userid (to)
+            satoshis transferred
+            timestamp
+            transaction_id
+    """
+    cur = db.cursor()
+
+    query = """
+    select distinct i.wallet, outputs.wallet, outputs.satoshis, outputs.timest, outputs.txid
+    from (
+            select *
+            from txoutput
+            except 
+            select o.*
+            from txoutput o, txinput i
+            where (o.txid = i.txid and o.wallet = i.wallet)
+        ) outputs, txinput i
+    where i.txid = outputs.txid and i.wallet <> outputs.wallet;
+    """
+
+    cur.execute(query)
+    res = cur.fetchall()
+    cur.close()
+
+    return res
+
+
+
+def get_users():
+    cur = db.cursor()
+    cur.execute("""
+    select distinct userid
+    from users;
+    """)
+
+    res = cur.fetchall()
+    cur.close()
+
+    return [int(r[0]) for r in res]
+
+
 if __name__ == '__main__':
     if '--create-users' in sys.argv:
         wallet_u, no_names = cluster_users()
         create_user_table(wallet_u)
 
     # Distribution of incomes of users
-    sat = get_user_incomes()
-    calc_lower_bound(sat, 0.90)
-    sns.distplot(sat, kde=False)
-    plt.show()
+    print('Calculting total user incomes..')
+    incomes = get_user_incomes()
 
     # Transactions between users
-    transactions = get_transactions()
-    calc_lower_bound(np.array([res[2] for res in transactions], dtype=np.int64))
+    print('Getting transactions between users..')
+    transactions = get_user_transactions()
+
+    print('Creating graph..')
+    g = create_graph(incomes, transactions)
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+    sat = np.array([_[0] for _ in incomes])
+
+    # Lowerbound on user incomes
+    # calc_lower_bound(sat, 0.95)
+    # calc_lower_bound(sat, 0.90)
+    # calc_lower_bound(sat, 0.85)
+    limit = calc_lower_bound(sat, 0.30)
+    add_lower_income_limit(g, limit)
+
+    print('Filterint Nodes')
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+    print('Plotting graph..')
+    pos = sfdp_layout(g, vweight=g.vp.vweight)
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='user_filtered_weights.png')
+    graph_draw(g, vertex_size=g.vp.vsize, output='user_filtered.png')
+
+    # sns.distplot(sat, kde=False)
+    # plt.show()
+
+    g.set_vertex_filter(None)
+
+    # Lower bound on user transactions
+    transaction_volumes = np.array([res[2] for res in transactions], dtype=np.int64)
+    transaction_limit = calc_lower_bound(transaction_volumes, 0.30)
+
+    add_lower_transaction_limit(g, transaction_limit)
+
+    print('Filtering Transactions')
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+    print('Plotting graph..')
+    pos = sfdp_layout(g, vweight=g.vp.vweight)
+    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered_weights.png')
+    graph_draw(g, vertex_size=g.vp.vsize, output='transactions_filtered.png')
