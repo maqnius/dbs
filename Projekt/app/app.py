@@ -1,6 +1,3 @@
-from gevent import monkey
-
-monkey.patch_all()
 import os
 import sys
 from bottle import run, get, template, abort, static_file, debug, redirect
@@ -58,22 +55,6 @@ SITES = {
     'graph': {
         'title': 'Network Graph',
         'data': db.test_graph
-    },
-    'dist': {
-        'title': 'Distribution of Transaction',
-        'data': db.trans_distribution
-    },
-    'walletdist': {
-        'title': 'Distribution of Walletincome',
-        'data': db.wallet_distribution
-    },
-    'transdist': {
-        'title': 'Distribution of Number Of Transaction per Wallet',
-        'data': db.no_trans_distribution
-    },
-    'all': {
-        'title': 'All Wallets',
-        'data': db.get_all
     }
 }
 
@@ -88,7 +69,7 @@ if __name__ == '__main__':
 
     # Run server at given ports
     try:
-        run(host=config['main']['host'], port=port, server='gevent')
+        run(host=config['main']['host'], port=port)
     except (KeyboardInterrupt, SystemExit):
         print("Shutting down server.")
         db.db.close()
