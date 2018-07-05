@@ -3,3 +3,4 @@ data/*
 !data/CSV_Database_of_First_Names.csv
 main.conf
 venv
+*.png
