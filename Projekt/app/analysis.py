@@ -13,7 +13,7 @@ from db import db
 from graph import *
 
 
-def calc_lower_bound(result, vol=0.90):
+def calc_lower_bound(result, vol=0.90, max_items=7000):
     """
     Sum up n biggest amounts of transactions until volume is at least
     90 % of the maximum
@@ -32,10 +32,16 @@ def calc_lower_bound(result, vol=0.90):
     # Descending sort
     result[::-1].sort()
 
+    if not max_items:
+        max_items = len(result)
+
     acc = 0
     for i, res in enumerate(result):
         acc += res
-        if acc / total > vol:
+        if i > max_items:
+            print("Maximum items von {} erreicht bei einem Anteil von {} vol".format(max_items, acc / total))
+            max_items = len(result)
+        if acc / total > vol or i > max_items:
             print('Lower bound for satoshi transaction of {} is enough to have {} % of transaction vol. '
                   'Use of {} % of items ({}).'
                   .format(res, int(vol * 100), int(i / len(result) * 100), i))
@@ -307,7 +313,7 @@ def filter_graph(g, incomes, transactions, amount_include=1.0, min_edges=0, filt
 
 
 def plot_graph(g, weighted=False, file='out.png', *args, **kwargs):
-    output_size = (900, 900)
+    output_size = (1200, 1200)
     if weighted:
         print('Calculating layout..')
         pos = sfdp_layout(g, vweight=g.vp.vweight, *args, **kwargs)
@@ -338,11 +344,22 @@ def get_data_for_analysis(what='wallet'):
     return incomes, transactions
 
 
-def plot_hist(income, fname):
+def plot_hist_incomes(income, fname):
     print('Plotting histogram to ' + fname)
-    sat = [int(_[0]) for _ in income]
-    sns.distplot(sat, kde=False)
-    plt.savefig(fname)
+    sat = np.array([int(_[0]) for _ in income if int(_[0]) > 0], dtype=np.int64)
+    sns.distplot(np.log10(sat), kde=False)
+    plt.yscale('log', nonposy='clip')
+    plt.savefig(fname, dpi=200)
+    plt.close()
+
+
+def plot_hist_trans(transactions, fname):
+    print('Plotting histogram to ' + fname)
+    sat = np.array([int(_[2]) for _ in transactions if int(_[2]) > 0], dtype=np.int64)
+    sns.distplot(np.log10(sat), kde=False)
+    plt.yscale('log', nonposy='clip')
+    plt.savefig(fname, dpi=200)
+    plt.close()
 
 
 if __name__ == '__main__':
@@ -352,9 +369,10 @@ if __name__ == '__main__':
 
         sys.exit(0)
 
-    incomes, transactions = get_data_for_analysis('user')
+    incomes, transactions = get_data_for_analysis('wallet')
 
-    # plot_hist(incomes, 'user_incomes_histogramm.eps')
+    plot_hist_incomes(incomes, 'wallet_incomes_histogramm.png')
+    plot_hist_trans(transactions, 'wallet_transactions_histogramm.png')
 
     # Create Graph
     g = create_graph(incomes, transactions)
@@ -364,10 +382,12 @@ if __name__ == '__main__':
     print("Nodes: ", g.num_vertices())
     print("Edges: ", g.num_edges())
 
-    # Filter Graph
-    filter_graph(g, incomes, transactions, amount_include=0.80, filter_by='income')
+    # Filter Graph by income
+    # filter_graph(g, incomes, transactions, amount_include=0.60, filter_by='income')
+    # plot_graph(g, weighted=True, file='filtered_incomes_user_weighted.png')
 
-    # Plot Graph
-    plot_graph(g, weighted=True, file='filtered_user_transactions_weighted.png')
-    filter_graph(g, incomes, transactions, amount_include=0.20, filter_by='income')
-    plot_graph(g, weighted=False, file='filtered_user_transactions.png')
+    # Filter Graph by transactions
+    filter_graph(g, incomes, transactions, amount_include=0.40, filter_by='income')
+    plot_graph(g, weighted=False, file='filtered_income_user.png')
+    filter_graph(g, incomes, transactions, amount_include=0.40, filter_by='transactions')
+    plot_graph(g, weighted=False, file='filtered_transactions_user.png')
