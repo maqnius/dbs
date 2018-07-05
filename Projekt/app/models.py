@@ -6,7 +6,7 @@ TXINPUT = ("CREATE TABLE txinput ("
             ");")
 
 
-TXOUTPUT = ("CREATE TABLE txoutput ("
+TXOUTPUT = ("CREATE TABLgE txoutput ("
             "txid char(64), "
             "satoshis bigint, "
             "wallet varchar(34), "

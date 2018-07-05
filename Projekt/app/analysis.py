@@ -346,7 +346,7 @@ if __name__ == '__main__':
 
     # sns.distplot(sat, kde=False)
     # plt.show()
-    incomes, transactions = get_data_for_analysis('transaction')
+    incomes, transactions = get_data_for_analysis('wallet')
 
     # Create Graph
     g = create_graph(incomes, transactions)
