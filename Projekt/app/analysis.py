@@ -307,12 +307,15 @@ def filter_graph(g, incomes, transactions, amount_include=1.0, filter_by='transa
 
 
 def plot_graph(g, weighted=False, C=2., file='out.png'):
-    print('Plotting graph to: '+file)
+    output_size = (900, 900)
     if weighted:
+        print('Calculating weights..')
         pos = sfdp_layout(g, vweight=g.vp.vweight, C=C)
-        graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output=file)
+        print('Plotting graph to: '+file)
+        graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output=file, output_size=output_size)
     else:
-        graph_draw(g, vertex_size=g.vp.vsize, output=file)
+        print('Plotting graph to: '+file)
+        graph_draw(g, vertex_size=g.vp.vsize, output=file, output_size=output_size)
 
 
 def get_data_for_analysis(what='wallet'):
@@ -339,9 +342,11 @@ if __name__ == '__main__':
         wallet_u, no_names = cluster_users()
         create_user_table(wallet_u)
 
+        sys.exit(0)
+
     # sns.distplot(sat, kde=False)
     # plt.show()
-    incomes, transactions = get_data_for_analysis('wallet')
+    incomes, transactions = get_data_for_analysis('transaction')
 
     # Create Graph
     g = create_graph(incomes, transactions)
@@ -352,7 +357,7 @@ if __name__ == '__main__':
     print("Edges: ", g.num_edges())
 
     # Filter Graph
-    filter_graph(g, incomes, transactions, amount_include=0.4, filter_by='transactions')
+    filter_graph(g, incomes, transactions, amount_include=0.95, filter_by='income')
 
     # Plot Graph
-    plot_graph(g, weighted=True)
+    plot_graph(g, weighted=True, C=1., file='filtered_wallet_transactions_weighted.png')
