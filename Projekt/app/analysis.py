@@ -281,7 +281,7 @@ def get_users():
     return [int(r[0]) for r in res]
 
 
-def filter_graph(g, incomes, transactions, amount_include=0.8, filter_by='transactions'):
+def filter_graph(g, incomes, transactions, amount_include=1.0, filter_by='transactions'):
     if filter_by not in ('transactions', 'income'):
         raise ValueError('Unknown argument')
 
@@ -346,8 +346,13 @@ if __name__ == '__main__':
     # Create Graph
     g = create_graph(incomes, transactions)
 
+    print('New graph has:')
+    # New amount of nodes, edges
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
     # Filter Graph
-    filter_graph(g, incomes, transactions, amount_include=0.7, filter_by='transactions')
+    filter_graph(g, incomes, transactions, amount_include=0.4, filter_by='transactions')
 
     # Plot Graph
     plot_graph(g, weighted=True)
