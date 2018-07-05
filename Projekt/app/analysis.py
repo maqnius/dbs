@@ -281,7 +281,7 @@ def get_users():
     return [int(r[0]) for r in res]
 
 
-def filter_graph(g, incomes, transactions, amount_include=1.0, filter_by='transactions'):
+def filter_graph(g, incomes, transactions, amount_include=1.0, min_edges=0, filter_by='transactions'):
     if filter_by not in ('transactions', 'income'):
         raise ValueError('Unknown argument')
 
@@ -293,13 +293,13 @@ def filter_graph(g, incomes, transactions, amount_include=1.0, filter_by='transa
     if filter_by == 'income':
         sat = np.array([_[0] for _ in incomes])
         limit = calc_lower_bound(sat, amount_include)
-        add_lower_income_limit(g, limit)
+        add_lower_income_limit(g, limit, min_edges)
 
     elif filter_by == 'transactions':
         # Lower bound on user transactions
         transaction_volumes = np.array([res[2] for res in transactions], dtype=np.int64)
         transaction_limit = calc_lower_bound(transaction_volumes, amount_include)
-        add_lower_transaction_limit(g, transaction_limit)
+        add_lower_transaction_limit(g, transaction_limit, min_edges)
 
     # New amount of nodes, edges
     print("Nodes: ", g.num_vertices())
@@ -312,10 +312,10 @@ def plot_graph(g, weighted=False, file='out.png', *args, **kwargs):
         print('Calculating layout..')
         pos = sfdp_layout(g, vweight=g.vp.vweight, *args, **kwargs)
         # pos = arf_layout(g, weight=g.ep.eweight)
-        print('Plotting graph to: '+file)
+        print('Plotting graph to: ' + file)
         graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output=file, output_size=output_size)
     else:
-        print('Plotting graph to: '+file)
+        print('Plotting graph to: ' + file)
         graph_draw(g, vertex_size=g.vp.vsize, output=file, output_size=output_size)
 
 
@@ -338,6 +338,13 @@ def get_data_for_analysis(what='wallet'):
     return incomes, transactions
 
 
+def plot_hist(income, fname):
+    print('Plotting histogram to ' + fname)
+    sat = [int(_[0]) for _ in income]
+    sns.distplot(sat, kde=False)
+    plt.savefig(fname)
+
+
 if __name__ == '__main__':
     if '--create-users' in sys.argv:
         wallet_u, no_names = cluster_users()
@@ -345,9 +352,9 @@ if __name__ == '__main__':
 
         sys.exit(0)
 
-    # sns.distplot(sat, kde=False)
-    # plt.show()
     incomes, transactions = get_data_for_analysis('user')
+
+    # plot_hist(incomes, 'user_incomes_histogramm.eps')
 
     # Create Graph
     g = create_graph(incomes, transactions)
@@ -358,8 +365,9 @@ if __name__ == '__main__':
     print("Edges: ", g.num_edges())
 
     # Filter Graph
-    filter_graph(g, incomes, transactions, amount_include=0.50, filter_by='income')
+    filter_graph(g, incomes, transactions, amount_include=0.80, filter_by='income')
 
     # Plot Graph
-    plot_graph(g, weighted=True, C=.2, gamma=2., file='filtered_user_transactions_weighted.png')
-    plot_graph(g, weighted=True, C=.4, gamma=5., file='filtered_user_transactions_higher_repulsive_force.png')
+    plot_graph(g, weighted=True, file='filtered_user_transactions_weighted.png')
+    filter_graph(g, incomes, transactions, amount_include=0.20, filter_by='income')
+    plot_graph(g, weighted=False, file='filtered_user_transactions.png')

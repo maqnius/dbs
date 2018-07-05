@@ -21,8 +21,6 @@ def create_graph(nodes, transactions):
     for v in g.vertices():
         index = g.vertex_index[v]
         try:
-            vertex_weight[v] = nodes[index][0]
-            vertex_size[v] = size_func(vertex_weight[index])
             node_map[nodes[index][1]] = index
         except KeyError:
             pass
@@ -41,10 +39,22 @@ def create_graph(nodes, transactions):
 
     g.add_edge_list(edges, eprops=(edge_weight,))
 
+
+    # Calc weights
+    for v in g.vertices():
+        weight = 0
+        for e in v.in_edges():
+            weight += g.ep.eweight[e]
+        for e in v.out_edges():
+            weight -= g.ep.eweight[e]
+
+        g.vp.vweight[v] = weight
+        g.vp.vsize[v] = size_func(weight)
+
     return g
 
 
-def add_lower_transaction_limit(g, limit, min_edges=0):
+def add_lower_transaction_limit(g, limit):
     limit_filter = g.new_edge_property('bool')
     vertex_filter = g.new_vertex_property('bool')
 
@@ -54,23 +64,21 @@ def add_lower_transaction_limit(g, limit, min_edges=0):
     g.set_edge_filter(limit_filter)
 
     for v in g.vertices():
-        vertex_filter[v] = len(list(v.all_edges())) > min_edges
+        vertex_filter[v] = len(list(v.all_edges())) > 0
 
     g.set_vertex_filter(vertex_filter)
 
 
-def add_lower_income_limit(g, limit, min_edges=0):
-    cur_filter, _ = g.get_vertex_filter()
-
+def add_lower_income_limit(g, limit):
     limit_filter = g.new_vertex_property('bool')
 
     for v in g.vertices():
-        limit_filter[v] = g.vp.vweight[v] > limit and len(list(v.all_edges())) > min_edges
+        limit_filter[v] = g.vp.vweight[v] > limit
 
     g.set_vertex_filter(limit_filter)
 
 
-def calc_sizes(weights, max=20, min=2):
+def calc_sizes(weights, max=100, min=2):
     """
     linear verteilt zwischen max und min
 

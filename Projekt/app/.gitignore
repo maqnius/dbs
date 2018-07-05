@@ -4,3 +4,4 @@ data/*
 main.conf
 venv
 *.png
+*.eps
