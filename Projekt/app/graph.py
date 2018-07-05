@@ -68,7 +68,7 @@ def add_lower_income_limit(g, limit):
     g.set_vertex_filter(limit_filter)
 
 
-def calc_sizes(weights, max=40, min=2):
+def calc_sizes(weights, max=100, min=2):
     """
     linear verteilt zwischen max und min
 

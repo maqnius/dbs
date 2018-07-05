@@ -306,11 +306,12 @@ def filter_graph(g, incomes, transactions, amount_include=1.0, filter_by='transa
     print("Edges: ", g.num_edges())
 
 
-def plot_graph(g, weighted=False, C=2., file='out.png'):
+def plot_graph(g, weighted=False, file='out.png', *args, **kwargs):
     output_size = (900, 900)
     if weighted:
-        print('Calculating weights..')
-        pos = sfdp_layout(g, vweight=g.vp.vweight, C=C)
+        print('Calculating layout..')
+        pos = sfdp_layout(g, vweight=g.vp.vweight, *args, **kwargs)
+        # pos = arf_layout(g, weight=g.ep.eweight)
         print('Plotting graph to: '+file)
         graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output=file, output_size=output_size)
     else:
@@ -346,7 +347,7 @@ if __name__ == '__main__':
 
     # sns.distplot(sat, kde=False)
     # plt.show()
-    incomes, transactions = get_data_for_analysis('wallet')
+    incomes, transactions = get_data_for_analysis('user')
 
     # Create Graph
     g = create_graph(incomes, transactions)
@@ -357,7 +358,8 @@ if __name__ == '__main__':
     print("Edges: ", g.num_edges())
 
     # Filter Graph
-    filter_graph(g, incomes, transactions, amount_include=0.95, filter_by='income')
+    filter_graph(g, incomes, transactions, amount_include=0.50, filter_by='income')
 
     # Plot Graph
-    plot_graph(g, weighted=True, C=1., file='filtered_wallet_transactions_weighted.png')
+    plot_graph(g, weighted=True, C=.2, gamma=2., file='filtered_user_transactions_weighted.png')
+    plot_graph(g, weighted=True, C=.4, gamma=5., file='filtered_user_transactions_higher_repulsive_force.png')
