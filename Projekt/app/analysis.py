@@ -281,60 +281,73 @@ def get_users():
     return [int(r[0]) for r in res]
 
 
+def filter_graph(g, incomes, transactions, amount_include=0.8, filter_by='transactions'):
+    if filter_by not in ('transactions', 'income'):
+        raise ValueError('Unknown argument')
+
+    # Reset filtering
+    g.set_edge_filter(None)
+    g.set_vertex_filter(None)
+
+    print('Filtering graph by ' + filter_by)
+    if filter_by == 'income':
+        sat = np.array([_[0] for _ in incomes])
+        limit = calc_lower_bound(sat, amount_include)
+        add_lower_income_limit(g, limit)
+
+    elif filter_by == 'transactions':
+        # Lower bound on user transactions
+        transaction_volumes = np.array([res[2] for res in transactions], dtype=np.int64)
+        transaction_limit = calc_lower_bound(transaction_volumes, amount_include)
+        add_lower_transaction_limit(g, transaction_limit)
+
+    # New amount of nodes, edges
+    print("Nodes: ", g.num_vertices())
+    print("Edges: ", g.num_edges())
+
+
+def plot_graph(g, weighted=False, C=2., file='out.png'):
+    print('Plotting graph to: '+file)
+    if weighted:
+        pos = sfdp_layout(g, vweight=g.vp.vweight, C=C)
+        graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output=file)
+    else:
+        graph_draw(g, vertex_size=g.vp.vsize, output=file)
+
+
+def get_data_for_analysis(what='wallet'):
+    if what not in ('wallet', 'user'):
+        raise ValueError('Unknown argument')
+
+    print('Calculting total ' + what + ' incomes..')
+    if what == 'wallet':
+        incomes = get_wallet_incomes()
+    elif what == 'user':
+        incomes = get_user_incomes()
+
+    print('Calculting total ' + what + ' transactions..')
+    if what == 'wallet':
+        transactions = get_wallet_transactions()
+    elif what == 'user':
+        transactions = get_user_transactions()
+
+    return incomes, transactions
+
+
 if __name__ == '__main__':
     if '--create-users' in sys.argv:
         wallet_u, no_names = cluster_users()
         create_user_table(wallet_u)
 
-    # Distribution of incomes of users
-    print('Calculting total user incomes..')
-    # incomes = get_wallet_incomes()
-    incomes = get_user_incomes()
-
-    # Transactions between users
-    print('Getting transactions between users..')
-    # transactions = get_wallet_transactions()
-    transactions = get_user_transactions()
-
-    print('Creating graph..')
-    g = create_graph(incomes, transactions)
-    print("Nodes: ", g.num_vertices())
-    print("Edges: ", g.num_edges())
-
-    sat = np.array([_[0] for _ in incomes])
-
-    # Lowerbound on user incomes
-    # calc_lower_bound(sat, 0.95)
-    # calc_lower_bound(sat, 0.90)
-    # calc_lower_bound(sat, 0.85)
-    limit = calc_lower_bound(sat, 0.40)
-    add_lower_income_limit(g, limit)
-
-    print('Filterint Nodes')
-    print("Nodes: ", g.num_vertices())
-    print("Edges: ", g.num_edges())
-
-    print('Plotting graph..')
-    pos = sfdp_layout(g, vweight=g.vp.vweight, C=.2)
-    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='user_filtered_weights.png')
-    graph_draw(g, vertex_size=g.vp.vsize, output='user_filtered.png')
-
     # sns.distplot(sat, kde=False)
     # plt.show()
+    incomes, transactions = get_data_for_analysis('wallet')
 
-    g.set_vertex_filter(None)
+    # Create Graph
+    g = create_graph(incomes, transactions)
 
-    # Lower bound on user transactions
-    transaction_volumes = np.array([res[2] for res in transactions], dtype=np.int64)
-    transaction_limit = calc_lower_bound(transaction_volumes, 0.40)
+    # Filter Graph
+    filter_graph(g, incomes, transactions, amount_include=0.7, filter_by='transactions')
 
-    add_lower_transaction_limit(g, transaction_limit)
-
-    print('Filtering Transactions')
-    print("Nodes: ", g.num_vertices())
-    print("Edges: ", g.num_edges())
-
-    print('Plotting graph..')
-    pos = sfdp_layout(g, vweight=g.vp.vweight, C=.2)
-    graph_draw(g, pos=pos, vertex_size=g.vp.vsize, output='transactions_filtered_weights_sfdp.png')
-    graph_draw(g, vertex_size=g.vp.vsize, output='transactions_filtered.png')
+    # Plot Graph
+    plot_graph(g, weighted=True)
